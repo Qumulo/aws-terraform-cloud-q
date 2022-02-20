@@ -24,8 +24,8 @@ Reference Architecture:
 
 For help planning the deployment see the table of documents below.
 
-|Documentation |Description|
-|-------------|-------------|
+|Documentation|Description|
+|-------------|-----------|
 |[DNS options in AWS: IP failover & client distribution](https://qumulo.com/resources/qumulo-dns-options-in-aws/) | Details on the DNS options in AWS.|
 |[Terraform: Supported AWS Regions](./docs/tf-supported-regions.pdf) | Details on supported AWS Regions for Cloud Q with Terraform.|
 |[Terraform: Deploying in a VPC with no internet access](./docs/tf-deploying-without-inet.pdf) | Details on deploying with Terraform into a VPC that has no internet access.|
@@ -34,9 +34,9 @@ For help planning the deployment see the table of documents below.
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
 |===
 
-## Deploying
+## Deploying with Terraform
 ### Terraform Guidance
-There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is 'deployment_name'.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a 'deployment_unique_name' is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the 'deployment_unique_name' and the 'deployment_name' is the keeper for the random alphanumeric.  The 'deployment_unique_name' will never change on subsequent Terraform applies as long as the 'deployment_name' is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc.
+There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name**' is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
 **IMPORTANT:** If you are spinning up multiple clusters, create unique .tfvar files for them and at an absolute minimum define a unique value for the 'q_cluster_name' variable.  If using the optional Route53 PHZ, also define a unique value for 'q_fqdn_name' for each cluster.
 
 ### Inputs
@@ -84,8 +84,8 @@ If you're using Qumulo Core version 4.3.0 or newer, you can populate data on you
 
 For more information on Qumulo SHIFT, custom CloudWatch Dashboards, adding nodes, the provisioning instance, and destroying the cluster see the documents in the table below.
 
-|Documentation |Description|
-|-------------|-------------|
+|Documentation|Description|
+|-------------|-----------|
 |[Qumulo SHIFT: Copy from Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-from-s3.md)| Copy data from S3 with the Qumulo GUI/CLI/API. |
 |[Qumulo SHIFT: Copy to Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-to-s3.md)| Copy data to S3 with the Qumulo GUI/CLI/API. |
 |[Terraform: Using the Custom CloudWatch Dashboard](./docs/tf-cloudwatch-dashboard.pdf)| Details on viewing the CloudWatch dashboard and resource groups that are created for the Qumulo cluster.|
