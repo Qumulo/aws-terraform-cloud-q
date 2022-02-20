@@ -7,26 +7,25 @@ Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
 ## Requirements
 
 This Terraform deploys Qumulo AMIs with [Qumulo Core Cloud Software](https://qumulo.com/product/cloud-products/) version `>= 4.2.0`
-Required Versions:
 * [Terraform](https://www.terraform.io/downloads) `>= 1.0.8`
 * [AWS Provider](https://github.com/hashicorp/terraform-provider-aws) `>= 3.7`
 * [HashiCorp/Random](https://github.com/hashicorp/terraform-provider-random) `>= 3.1`
 * [HashiCorp/Null](https://github.com/hashicorp/terraform-provider-null) `>= 3.1`
 
-A subscription to an [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?x=0&y=0&searchTerms=qumulo) Qumulo offer is required.
+A subscription to a Qumulo offer in [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?x=0&y=0&searchTerms=qumulo) is required.
 For private offers via the AWS Marketplace contact [Qumulo Sales](http://discover.qumulo.com/cloud-calc-contact.html).
 
-## Usage
+## Planning the Deployment
 
 **IMPORTANT:** When cloning this repository specify the tagged release version because there may be breaking changes between releases. Example: git clone <repo_url> --branch <tag_name> --single-branch
 
 Reference Architecture:
 ![Ref Arch](./docs/qumulo-cloud-q-architecture_diagram.png)
 
-### Pre-Deployment Docs
 For help planning the deployment see the table of documents below.
 
 |Documentation |Description|
+|-------------|-------------|
 |[DNS options in AWS: IP failover & client distribution](https://qumulo.com/resources/qumulo-dns-options-in-aws/) | Details on the DNS options in AWS.|
 |[Terraform: Supported AWS Regions](./docs/tf-supported-regions.pdf) | Details on supported AWS Regions for Cloud Q with Terraform.|
 |[Terraform: Deploying in a VPC with no internet access](./docs/tf-deploying-without-inet.pdf) | Details on deploying with Terraform into a VPC that has no internet access.|
@@ -35,6 +34,7 @@ For help planning the deployment see the table of documents below.
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
 |===
 
+## Deploying
 ### Terraform Guidance
 There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is 'deployment_name'.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a 'deployment_unique_name' is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the 'deployment_unique_name' and the 'deployment_name' is the keeper for the random alphanumeric.  The 'deployment_unique_name' will never change on subsequent Terraform applies as long as the 'deployment_name' is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc.
 **IMPORTANT:** If you are spinning up multiple clusters, create unique .tfvar files for them and at an absolute minimum define a unique value for the 'q_cluster_name' variable.  If using the optional Route53 PHZ, also define a unique value for 'q_fqdn_name' for each cluster.
@@ -79,12 +79,13 @@ Select between the minimalist standard.tfvars or the fully featured advanced.tfv
 | qumulo_private_url_node1 | Private URL for the Qumulo cluster |
 | qumulo_private_NFS | Link to the private IP for Qumulo cluster node 1 |
 
-### Post-Deployment Docs
+## Post-Deployment
 If you're using Qumulo Core version 4.3.0 or newer, you can populate data on your Qumulo cluster by copying data from an Amazon S3 bucket using [Qumulo Shift for Amazon S3](https://qumulo.com/wp-content/uploads/2020/06/ShiftForAWS_DataSheet.pdf).
 
 For more information on Qumulo SHIFT, custom CloudWatch Dashboards, adding nodes, the provisioning instance, and destroying the cluster see the documents in the table below.
 
 |Documentation |Description|
+|-------------|-------------|
 |[Qumulo SHIFT: Copy from Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-from-s3.md)| Copy data from S3 with the Qumulo GUI/CLI/API. |
 |[Qumulo SHIFT: Copy to Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-to-s3.md)| Copy data to S3 with the Qumulo GUI/CLI/API. |
 |[Terraform: Using the Custom CloudWatch Dashboard](./docs/tf-cloudwatch-dashboard.pdf)| Details on viewing the CloudWatch dashboard and resource groups that are created for the Qumulo cluster.|
