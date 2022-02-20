@@ -8,10 +8,10 @@ Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
 
 This Terraform deploys Qumulo AMIs with [Qumulo Core Cloud Software](https://qumulo.com/product/cloud-products/) version `>= 4.2.0`
 Required Versions:
-[Terraform](https://www.terraform.io/downloads) `>= 1.0.8`
-[AWS Provider](https://github.com/hashicorp/terraform-provider-aws) `>= 3.7`
-[HashiCorp/Random](https://github.com/hashicorp/terraform-provider-random) `>= 3.1`
-[HashiCorp/Null](https://github.com/hashicorp/terraform-provider-null) `>= 3.1`
+* [Terraform](https://www.terraform.io/downloads) `>= 1.0.8`
+* [AWS Provider](https://github.com/hashicorp/terraform-provider-aws) `>= 3.7`
+* [HashiCorp/Random](https://github.com/hashicorp/terraform-provider-random) `>= 3.1`
+* [HashiCorp/Null](https://github.com/hashicorp/terraform-provider-null) `>= 3.1`
 
 A subscription to an [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?x=0&y=0&searchTerms=qumulo) Qumulo offer is required.
 For private offers via the AWS Marketplace contact [Qumulo Sales](http://discover.qumulo.com/cloud-calc-contact.html).
