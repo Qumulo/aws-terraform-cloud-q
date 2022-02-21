@@ -28,7 +28,7 @@ For help planning the deployment see the table of documents below.
 |-------------|-----------|
 |[DNS options in AWS: IP failover & client distribution](https://qumulo.com/resources/qumulo-dns-options-in-aws/) | Details on the DNS options in AWS.|
 |[Terraform: Supported AWS Regions](./docs/tf-supported-regions.pdf) | Details on supported AWS Regions for Cloud Q with Terraform.|
-|[Terraform: Deploying in a VPC with no outbound internet access](./docs/tf-deploying-without-inet.pdf) | Details on deploying with Terraform into a VPC that has no internet access.|
+|[Terraform: Deploying in a VPC with no outbound internet access](./docs/tf-deploying-without-inet.pdf) | Details on deploying with Terraform into a VPC that has no outbound internet access.|
 |[Terraform: Deploying using an AWS Custom IAM role](./docs/tf-deploying-with-custom-iam-role.pdf) | Details on deploying with Terraform using a custom IAM role.|
 |[Terraform: AWS resources & EBS Service Quota planning](./docs/tf-resources-ebs-quota-planning.pdf) | Details on service-quota planning for Amazon EBS, including EC2 instance types and EBS volume types.|
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
