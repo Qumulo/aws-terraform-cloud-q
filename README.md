@@ -32,7 +32,6 @@ For help planning the deployment see the table of documents below.
 |[Terraform: Deploying using an AWS Custom IAM role](./docs/tf-deploying-with-custom-iam-role.pdf) | Details on deploying with Terraform using a custom IAM role.|
 |[Terraform: AWS resources & EBS Service Quota planning](./docs/tf-resources-ebs-quota-planning.pdf) | Details on service-quota planning for Amazon EBS, including EC2 instance types and EBS volume types.|
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
-|===
 
 ## Deploying with Terraform
 ### Terraform Guidance
