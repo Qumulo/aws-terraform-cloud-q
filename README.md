@@ -75,8 +75,7 @@ Select between the minimalist **standard.tfvars** or the fully featured **advanc
 | qumulo_private_NFS | Private NFS path for the Qumulo cluster |
 | qumulo_private_SMB | Private SMB UNC path for the Qumulo cluster |
 | qumulo_private_url | Private URL for the Qumulo cluster |
-| qumulo_private_url_node1 | Private URL for the Qumulo cluster |
-| qumulo_private_NFS | Link to the private IP for Qumulo cluster node 1 |
+| qumulo_private_url_node1 | Link to the private IP for Qumulo cluster node 1 |
 
 ## Post-Deployment
 If you're using Qumulo Core version 4.3.0 or newer, you can populate data on your Qumulo cluster by copying data from an Amazon S3 bucket using [Qumulo Shift for Amazon S3](https://qumulo.com/wp-content/uploads/2020/06/ShiftForAWS_DataSheet.pdf).
