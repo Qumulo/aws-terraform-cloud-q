@@ -42,7 +42,7 @@ There are a multitude of Terraform workflows from those that just use a default 
 Select between the minimalist **standard.tfvars** or the fully featured **advanced.tfvars**.  **Terraform.tfvars** is a copy of **advanced.tfvars** in this repository. These files all have extensive comments providing guidance on each variable.  The standard version makes many decisions for you to simplify the input process and deploy a Qumulo cluster with the software version of the Qumulo AMI.  The advanced version provides the flexibility that most production environments will require, as seen in the table below.
 
 |  | standard.tvfars | advanced.tvfars |
-|------|-------------|-------------|
+|--:-----------------:-------------|
 | Deploy in a Local Zone || ✅ |
 | Deploy on Outposts || ✅ |
 | Deploy with a Custom AMI-ID || ✅ |
