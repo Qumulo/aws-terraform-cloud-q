@@ -24,7 +24,7 @@ data "terraform_remote_state" "main" {
   backend = "local"
 
   config = {
-    path = terraform.workspace == default ? "../terraform.tfstate" : "../terraform.tfstate.d/${terraform.workspace}/terraform.tfstate"
+    path = terraform.workspace == "default" ? "../terraform.tfstate" : "../terraform.tfstate.d/${terraform.workspace}/terraform.tfstate"
   }
 }
 
@@ -33,7 +33,7 @@ data "aws_ssm_parameter" "nlb-management" {
 }
 
 locals {
-  deployment_unique_name       = data.terraform_remote_state.main.outputs.unique_name_for_deployment
+  deployment_unique_name       = data.terraform_remote_state.main.outputs.deployment_unique_name
   aws_vpc_id                   = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["aws_vpc_id"]
   cluster_primary_ips          = toset(jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["cluster_primary_ips"])
   public_replication_provision = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_replication_provision"]

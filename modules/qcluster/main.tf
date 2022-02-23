@@ -158,7 +158,7 @@ locals {
 }
 
 resource "aws_security_group" "cluster" {
-  name        = "${var.deployment_unique_name}-qumulo-security-group"
+  name        = "${var.deployment_unique_name}-qumulo-cluster"
   description = "Enable ports for NFS/SMB/FTP/SSH, Management, Replication, and Clustering."
   vpc_id      = var.aws_vpc_id
 
@@ -191,7 +191,7 @@ resource "aws_security_group" "cluster" {
 }
 
 resource "aws_iam_role" "q_access" {
-  name = "${var.deployment_unique_name}-qumulo-access-role"
+  name = "${var.deployment_unique_name}-qumulo-cluster"
 
   assume_role_policy = <<EOF
 {
@@ -213,12 +213,12 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "q_access" {
-  name = "${var.deployment_unique_name}-qumulo-instance-profile"
+  name = "${var.deployment_unique_name}-qumulo-cluster"
   role = aws_iam_role.q_access.name
 }
 
 resource "aws_iam_role_policy" "policy1" {
-  name   = "qumulo-access-EC2-CW-logs"
+  name   = "EC2-CW-logs-policy"
   role   = aws_iam_role.q_access.id
   policy = <<EOF
 {
@@ -244,7 +244,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "policy2" {
-  name   = "qumulo-access-KMSCMK"
+  name   = "KMS-CMK-policy"
   role   = aws_iam_role.q_access.id
   policy = <<EOF
 {
@@ -324,7 +324,7 @@ resource "aws_instance" "node" {
   }
 
   lifecycle {
-    ignore_changes = [ami, user_data, root_block_device[0].kms_key_id, ebs_block_device]
+    ignore_changes = [ami, user_data, root_block_device[0].kms_key_id, ebs_block_device, placement_group]
   }
 }
 

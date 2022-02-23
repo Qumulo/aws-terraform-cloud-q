@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-# **** Version 4.0 ****
+# **** Version 3.1 ****
 
 data "aws_caller_identity" "current" {}
 
@@ -31,8 +31,8 @@ data "aws_vpc" "selected" {
 }
 
 locals {
-  #Appends a random alpha numeric to the deployment name.  All resources are tagged/named with this unique name.
-  deployment_unique_name = "${var.deployment_name}-${random_string.alphanumeric.id}"
+  #local variable for cleaner references in subsequent use
+  deployment_unique_name = null_resource.name_lock.triggers.deployment_unique_name
 
   #Paths and S3 prefixes for the provisioning module
   functions_path      = "./modules/qprovisioner/functions/"
@@ -43,7 +43,7 @@ locals {
   state_s3_prefix     = "${var.s3_bucket_prefix}${local.deployment_unique_name}"
 }
 
-#Generates a 11 digit random alphanumeric for the deployment_unique_name.  This will only change if the deployment name is changed.
+#Generates a 11 digit random alphanumeric for the deployment_unique_name.  Generated on first apply and never changes.
 resource "random_string" "alphanumeric" {
   length    = 11
   lower     = false
@@ -54,6 +54,17 @@ resource "random_string" "alphanumeric" {
   keepers = {
     name = var.deployment_name
   }
+  lifecycle { ignore_changes = all }  
+}
+
+#This  resource is used to 'lock' the deployment_unique_name.  Any changes to the deployment_name after the first apply are ignored.
+#Appends the random alpha numeric to the deployment name.  All resources are tagged/named with this unique name.
+resource "null_resource" "name_lock" {
+    triggers = {
+      deployment_unique_name = "${var.deployment_name}-${random_string.alphanumeric.id}"
+    }
+
+  lifecycle { ignore_changes = all }
 }
 
 #Copy files from the terraform local directory to the specified S3 bucket.  Unique S3 prefix per cluster.  Files will only be updated if the MD5 hash changes.
@@ -111,12 +122,12 @@ module "qcluster" {
   ec2_key_pair            = var.ec2_key_pair
   floating_ips_per_node   = var.q_floating_ips_per_node
   instance_recovery_topic = var.q_instance_recovery_topic
-  instance_type           = (var.q_instance_type == "m5.xlarge") && (var.dev_environment == false) ? "m5.2xlarge" : var.q_instance_type
+  instance_type           = (var.q_instance_type == "m5.xlarge" && var.dev_environment) || var.q_instance_type != "m5.xlarge" ? var.q_instance_type : "m5.2xlarge"
   kms_key_id              = var.kms_key_id
-  node_count              = (var.q_marketplace_type == "Custom-1TB-6PB") || (var.q_node_count != 0) ? var.q_node_count : lookup(var.q_marketplace_map[var.q_marketplace_type], "NodeCount")
+  node_count              = var.q_marketplace_type == "Specified-AMI-ID" || var.q_marketplace_type == "Custom-1TB-6PB" || var.q_node_count != 0 ? var.q_node_count : lookup(var.q_marketplace_map[var.q_marketplace_type], "NodeCount")
   permissions_boundary    = var.q_permissions_boundary
   private_subnet_id       = var.private_subnet_id
-  cluster_sg_cidrs        = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", var.q_cluster_additional_sg_cidrs)))
+  cluster_sg_cidrs        = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", replace(var.q_cluster_additional_sg_cidrs, "/\\s*/", ""))))
   term_protection         = var.term_protection
 
   tags = var.tags
@@ -125,6 +136,7 @@ module "qcluster" {
 #This sub-module instantiates an EC2 instance for configuration of the Qumulo Cluster and is then shutdown.  
 #Floating IPs, Sidecar role and permissions, admin password, and CMK Policy management are all configured.
 #Software updates are also automated for the unconfigured instances in the cluster and then quorum is formed.
+#Node additions are also supported with this provisioning instance to grow the cluster.
 #Until Terraform supports user data updates without destroying the instance, this instance will get destroyed
 #and recreated on subsequent applies.  It is built for this as all state is stored in SSM Parameter Store.
 module "qprovisioner" {
@@ -143,7 +155,7 @@ module "qprovisioner" {
   cluster_node1_ip           = module.qcluster.node1_ip
   cluster_primary_ips        = module.qcluster.primary_ips
   cluster_secrets_arn        = module.secrets.cluster_secrets_arn
-  cluster_sg_cidrs           = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", var.q_cluster_additional_sg_cidrs)))
+  cluster_sg_cidrs           = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", replace(var.q_cluster_additional_sg_cidrs, "/\\s*/", ""))))
   cluster_temporary_password = module.qcluster.temporary_password
   cluster_version            = var.q_cluster_version
   deployment_unique_name     = local.deployment_unique_name
@@ -202,7 +214,7 @@ module "route53-phz" {
 }
 
 #This module creates a resource groups for filtered views of EC2, EBS SSD, and EBS HDD.
-#It also creates a log group for Qumulo audio logs and CloudWatch dashboard for the cluster.
+#It also creates a log group for Qumulo audit logs and CloudWatch dashboard for the cluster.
 module "cloudwatch" {
   source = "./modules/cloudwatch"
 
@@ -217,7 +229,7 @@ module "cloudwatch" {
 
 #Stores variables in SSM parameter store for use by the standalone nlb-management module.
 resource "aws_ssm_parameter" "nlb-management" {
-  name = "/qumulo/${var.deployment_name}-${random_string.alphanumeric.id}/nlb-management/vars"
+  name = "/qumulo/${local.deployment_unique_name}/nlb-management/vars"
   type = "String"
   value = jsonencode({
     aws_vpc_id                   = var.aws_vpc_id

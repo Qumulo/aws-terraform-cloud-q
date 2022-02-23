@@ -22,7 +22,7 @@
 
 output "deployment_unique_name" {
   description = "The unique name for this deployment."
-  value       = "${var.deployment_name}-${random_string.alphanumeric.id}"
+  value       = local.deployment_unique_name
 }
 output "qumulo_cluster_provisioned" {
   description = "If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure"

@@ -58,7 +58,7 @@ locals {
 }
 
 resource "aws_security_group" "provisioner" {
-  name        = "${var.deployment_unique_name}-provisioner-security-group"
+  name        = "${var.deployment_unique_name}-qumulo-provisioner"
   description = "Enable ports to provisioner instance"
   vpc_id      = var.aws_vpc_id
 
@@ -84,7 +84,7 @@ resource "aws_security_group" "provisioner" {
 }
 
 resource "aws_iam_role" "provisioner_access" {
-  name = "${var.deployment_unique_name}-provisioner-access-role"
+  name = "${var.deployment_unique_name}-qumulo-provisioner"
 
   assume_role_policy = <<EOF
 {
@@ -106,7 +106,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "provisioner_access" {
-  name = "${var.deployment_unique_name}-provisioner-instance-profile"
+  name = "${var.deployment_unique_name}-qumulo-provisioner"
   role = aws_iam_role.provisioner_access.name
 }
 
@@ -116,7 +116,7 @@ resource "aws_iam_role_policy_attachment" "secrets" {
 }
 
 resource "aws_iam_role_policy" "policy1" {
-  name   = "s3-access-policy"
+  name   = "s3-policy"
   role   = aws_iam_role.provisioner_access.id
   policy = <<EOF
 {
@@ -139,7 +139,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "policy2" {
-  name   = "provisioner-EC2-Labmda-SSM"
+  name   = "EC2-Labmda-SSM-policy"
   role   = aws_iam_role.provisioner_access.id
   policy = <<EOF
 {
@@ -175,7 +175,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "policy3" {
-  name   = "provisioner-KMS-policy"
+  name   = "KMS-policy"
   role   = aws_iam_role.provisioner_access.id
   policy = <<EOF
 {
@@ -320,7 +320,8 @@ resource "aws_instance" "provisioner" {
   }
 }
 
-#This resource monitors the status of the qprovisioner module that executes secondary provisioning of the Qumulo cluster.
+#This resource monitors the status of the qprovisioner module (EC2 Instance) that executes secondary provisioning of the Qumulo cluster.
+#It pulls status from SSM Parameter Store where the provisioner writest status/state.
 locals {
   is_windows = substr(pathexpand("~"), 0, 1) == "/" ? false : true
 }

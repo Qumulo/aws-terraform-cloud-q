@@ -22,7 +22,8 @@
 
 # ****************************** Required *************************************************************
 # ***** Terraform Variables *****
-# deployment_name                   - Terraform Workspace Name or any other name. All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+# deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+#                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
 deployment_name = "my-deployment-name"
 
 # ***** S3 Bucket Variables *****

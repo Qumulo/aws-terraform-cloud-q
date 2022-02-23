@@ -22,7 +22,8 @@
 
 # ****************************** Required *************************************************************
 # ***** Terraform Variables *****
-# deployment_name                   - Terraform Workspace Name or any other name. All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+# deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+#                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
 deployment_name = "my-deployment-name"
 
 # ***** S3 Bucket Variables *****
@@ -49,7 +50,7 @@ term_protection   = true
 # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
 # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
 # q_cluster_version                 - Software version for creation >= 4.2.0.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
-# q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge
+# q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
 # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
 #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
 #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
