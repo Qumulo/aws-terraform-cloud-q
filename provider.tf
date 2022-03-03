@@ -36,7 +36,3 @@ provider "aws" {
   alias  = "bucket"
   region = var.s3_bucket_region
 }
-
-provider "null" {}
-
-provider "random" {}
