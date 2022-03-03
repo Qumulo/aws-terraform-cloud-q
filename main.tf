@@ -37,7 +37,7 @@ locals {
   #Paths and S3 prefixes for the provisioning module
   functions_path      = "./modules/qprovisioner/functions/"
   functions_s3_prefix = "${var.s3_bucket_prefix}${local.deployment_unique_name}/functions/"
-  upgrade_path        = "./modules/qprovisioner/upgrade/"
+  upgrade_path        = "${path.module}/modules/qprovisioner/scripts/"
   upgrade_s3_prefix   = "${var.s3_bucket_prefix}${local.deployment_unique_name}/upgrade/"
   scripts_path        = "./modules/qprovisioner/scripts/"
   state_s3_prefix     = "${var.s3_bucket_prefix}${local.deployment_unique_name}"
