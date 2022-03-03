@@ -54,15 +54,15 @@ resource "random_string" "alphanumeric" {
   keepers = {
     name = var.deployment_name
   }
-  lifecycle { ignore_changes = all }  
+  lifecycle { ignore_changes = all }
 }
 
 #This  resource is used to 'lock' the deployment_unique_name.  Any changes to the deployment_name after the first apply are ignored.
 #Appends the random alpha numeric to the deployment name.  All resources are tagged/named with this unique name.
 resource "null_resource" "name_lock" {
-    triggers = {
-      deployment_unique_name = "${var.deployment_name}-${random_string.alphanumeric.id}"
-    }
+  triggers = {
+    deployment_unique_name = "${var.deployment_name}-${random_string.alphanumeric.id}"
+  }
 
   lifecycle { ignore_changes = all }
 }
@@ -224,7 +224,8 @@ module "cloudwatch" {
   cluster_name           = var.q_cluster_name
   deployment_unique_name = local.deployment_unique_name
   node_names             = join("\",\"", module.qcluster.node_names)
-  tags                   = var.tags
+
+  tags = var.tags
 }
 
 #Stores variables in SSM parameter store for use by the standalone nlb-management module.

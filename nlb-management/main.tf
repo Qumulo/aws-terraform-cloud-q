@@ -52,7 +52,7 @@ resource "aws_lb" "mgmt_nlb" {
     subnet_id = local.public_subnet_id
   }
 
-  tags = merge({ Name = "${local.deployment_unique_name}" }, local.tags)
+  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
 }
 
 resource "aws_lb_target_group" "port_443" {
@@ -67,7 +67,7 @@ resource "aws_lb_target_group" "port_443" {
     type    = "source_ip"
   }
 
-  tags = merge({ Name = "${local.deployment_unique_name}" }, local.tags)
+  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
 }
 
 resource "aws_lb_target_group_attachment" "port_443" {
@@ -101,7 +101,7 @@ resource "aws_lb_target_group" "port_3712" {
     type    = "source_ip"
   }
 
-  tags = merge({ Name = "${local.deployment_unique_name}" }, local.tags)
+  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
 }
 
 resource "aws_lb_target_group_attachment" "port_3712" {

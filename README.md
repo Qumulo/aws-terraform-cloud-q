@@ -1,6 +1,6 @@
 [![Qumulo Logo](https://qumulo.com/wp-content/uploads/2021/06/CloudQ-Logo_OnLight.png)](http://qumulo.com)
 
-# aws-terraform-cloud-q ![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)
+# aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases)
 
 Comprehensive Terraform to deploy a Qumulo cluster with 4 to 20 instances per the AWS Well Architected Framework.
 Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
@@ -36,7 +36,7 @@ For help planning the deployment see the table of documents below.
 
 ## Deploying with Terraform
 ### Terraform Naming Guidance
-There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated on the first apply that consists of the **deployment_name** appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name**. The **deployment_unique_name** will never change on subsequent Terraform applies.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
+There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name** is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
 <br />
 **IMPORTANT:** If you are spinning up multiple clusters, create unique .tfvar files for them and a unique value for the **q_cluster_name** variable.  If using the optional Route53 PHZ, also define a unique value for **q_fqdn_name** for each cluster.
 

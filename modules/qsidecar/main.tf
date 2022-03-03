@@ -33,5 +33,5 @@ resource "aws_cloudformation_stack" "sidecar" {
     Username      = var.sidecar_user_name
   }
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }

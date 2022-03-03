@@ -25,7 +25,7 @@ resource "aws_cloudwatch_log_group" "audit_log" {
 
   name = "/qumulo/${var.deployment_unique_name}-audit-log"
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_resourcegroups_group" "cluster_rg" {

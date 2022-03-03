@@ -187,7 +187,7 @@ resource "aws_security_group" "cluster" {
     }
   }
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_iam_role" "q_access" {
@@ -271,7 +271,7 @@ resource "aws_placement_group" "cluster" {
   name     = var.deployment_unique_name
   strategy = "cluster"
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_network_interface" "node" {
@@ -281,7 +281,7 @@ resource "aws_network_interface" "node" {
   security_groups   = [aws_security_group.cluster.id]
   subnet_id         = var.private_subnet_id
 
-  tags = merge({ Name = "${var.deployment_unique_name}-node ${count.index + 1}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}-node ${count.index + 1}" })
 }
 
 resource "aws_instance" "node" {
@@ -296,7 +296,7 @@ resource "aws_instance" "node" {
   iam_instance_profile    = aws_iam_instance_profile.q_access.name
   user_data               = length(local.slot_specs) > 0 ? jsonencode(local.user_data_spec_info) : null
 
-  tags = merge({ Name = "${var.deployment_unique_name}-node${count.index + 1}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}-node${count.index + 1}" })
 
   network_interface {
     device_index         = 0
@@ -307,7 +307,7 @@ resource "aws_instance" "node" {
     encrypted  = true
     kms_key_id = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
 
-    tags = merge({ Name = "${var.deployment_unique_name}-boot" }, var.tags)
+    tags = merge(var.tags, { Name = "${var.deployment_unique_name}-boot" })
   }
 
   dynamic "ebs_block_device" {
@@ -319,7 +319,7 @@ resource "aws_instance" "node" {
       volume_type = ebs_block_device.value.volume_type
       volume_size = ebs_block_device.value.volume_size
 
-      tags = merge({ Name = "${var.deployment_unique_name}-${ebs_block_device.value.volume_type}" }, var.tags)
+      tags = merge(var.tags, { Name = "${var.deployment_unique_name}-${ebs_block_device.value.volume_type}" })
     }
   }
 

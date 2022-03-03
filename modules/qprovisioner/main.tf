@@ -80,7 +80,7 @@ resource "aws_security_group" "provisioner" {
     }
   }
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_iam_role" "provisioner_access" {
@@ -265,7 +265,7 @@ resource "aws_network_interface" "provisioner" {
   security_groups = [aws_security_group.provisioner.id]
   subnet_id       = var.private_subnet_id
 
-  tags = merge({ Name = "${var.deployment_unique_name}-provisioner}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}-provisioner}" })
 }
 
 resource "aws_instance" "provisioner" {
@@ -300,7 +300,7 @@ resource "aws_instance" "provisioner" {
     version                = var.cluster_version
   })
 
-  tags = merge({ Name = "${var.deployment_unique_name}-provisioner" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}-provisioner" })
 
   network_interface {
     device_index         = 0
@@ -312,7 +312,7 @@ resource "aws_instance" "provisioner" {
     kms_key_id  = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
     volume_size = 40
 
-    tags = merge({ Name = "${var.deployment_unique_name}-provisioner" }, var.tags)
+    tags = merge(var.tags, { Name = "${var.deployment_unique_name}-provisioner" })
   }
 
   lifecycle {
@@ -323,7 +323,10 @@ resource "aws_instance" "provisioner" {
 #This resource monitors the status of the qprovisioner module (EC2 Instance) that executes secondary provisioning of the Qumulo cluster.
 #It pulls status from SSM Parameter Store where the provisioner writest status/state.
 locals {
-  is_windows = substr(pathexpand("~"), 0, 1) == "/" ? false : true
+  is_windows  = substr(pathexpand("~"), 0, 1) == "/" ? false : true
+  status_sh   = "${var.scripts_path}status.sh"
+  status_ps1  = "${var.scripts_path}status.ps1"
+  status_vars = { aws_region = var.aws_region, deployment_unique_name = var.deployment_unique_name, aws_instance_id = aws_instance.provisioner.id }
 }
 
 data "aws_ssm_parameter" "qprovisioner" {
@@ -332,30 +335,10 @@ data "aws_ssm_parameter" "qprovisioner" {
   depends_on = [null_resource.provisioner_status]
 }
 
-data "template_file" "status-sh" {
-  template = file("${var.scripts_path}status.sh")
-
-  vars = {
-    aws_region             = var.aws_region
-    deployment_unique_name = var.deployment_unique_name
-    aws_instance_id        = aws_instance.provisioner.id
-  }
-}
-
-data "template_file" "status-ps1" {
-  template = file("${var.scripts_path}status.ps1")
-
-  vars = {
-    aws_region             = var.aws_region
-    deployment_unique_name = var.deployment_unique_name
-    aws_instance_id        = aws_instance.provisioner.id
-  }
-}
-
 resource "null_resource" "provisioner_status" {
   provisioner "local-exec" {
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
-    command     = local.is_windows ? "${data.template_file.status-ps1.rendered}" : "/bin/bash ${data.template_file.status-sh.rendered}"
+    command     = local.is_windows ? templatefile(local.status_ps1, local.status_vars) : templatefile(local.status_sh, local.status_vars)
   }
 
   triggers = {

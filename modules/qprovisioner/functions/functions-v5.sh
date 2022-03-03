@@ -108,6 +108,7 @@ vercomp () {
   return 0
 }
 
+#For CloudFormation
 modcmkpolicy () {
   local cmk=$1 region=$2 stackname=$3 sc_lid=$4 cq_lid=$5 lam_lid=$6 
   local m sc_arn="" tag_name sc_name sub sc_stackname sc_stack_id cloudq_stack_id arn_list=() output
@@ -145,6 +146,7 @@ modcmkpolicy () {
   aws kms put-key-policy --region $region --key-id $cmk --policy-name default --policy file://./new_policy.json
 }
 
+#For Terraform
 modcmkpolicyTF () {
   local cmk=$1 region=$2 stackname=$3 lam_lid=$4
   local m sc_arn="" tag_name sub stack_status arn_list=()

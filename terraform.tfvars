@@ -86,7 +86,8 @@ q_node_count  = 0
 # ****************************** Optional **************************************************************
 # ***** Environment and Tag Options *****
 # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
-# tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc
+# tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
+#                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
 #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
 dev_environment = false
 tags            = null

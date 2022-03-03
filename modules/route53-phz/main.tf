@@ -27,7 +27,7 @@ resource "aws_route53_zone" "qumulo_hosted_zone" {
     vpc_id = var.aws_vpc_id
   }
 
-  tags = merge({ Name = "${var.deployment_unique_name}" }, var.tags)
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_route53_record" "qumulo_fips" {
