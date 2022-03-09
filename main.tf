@@ -35,11 +35,11 @@ locals {
   deployment_unique_name = null_resource.name_lock.triggers.deployment_unique_name
 
   #Paths and S3 prefixes for the provisioning module
-  functions_path      = "./modules/qprovisioner/functions/"
+  functions_path      = "${path.module}/modules/qprovisioner/functions/"
   functions_s3_prefix = "${var.s3_bucket_prefix}${local.deployment_unique_name}/functions/"
-  upgrade_path        = "${path.module}/modules/qprovisioner/scripts/"
+  upgrade_path        = "${path.module}/modules/qprovisioner/upgrade/"
   upgrade_s3_prefix   = "${var.s3_bucket_prefix}${local.deployment_unique_name}/upgrade/"
-  scripts_path        = "./modules/qprovisioner/scripts/"
+  scripts_path        = "${path.module}/modules/qprovisioner/scripts/"
   state_s3_prefix     = "${var.s3_bucket_prefix}${local.deployment_unique_name}"
 }
 
