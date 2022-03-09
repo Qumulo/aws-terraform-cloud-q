@@ -1,3 +1,4 @@
+<!-- BEGIN_TF_DOCS -->
 [![Qumulo Logo](https://qumulo.com/wp-content/uploads/2021/06/CloudQ-Logo_OnLight.png)](http://qumulo.com)
 
 # aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases)
@@ -35,12 +36,20 @@ For help planning the deployment see the table of documents below.
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
 
 ## Deploying with Terraform
+
+### Deployment Considerations
+
+* This is meant to be sourced as a module
+
+### Terraform Naming Guidance
+There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name** is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
+<br />
 ### Terraform Naming Guidance
 There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name** is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
 <br />
 **IMPORTANT:** If you are spinning up multiple clusters, create unique .tfvar files for them and a unique value for the **q_cluster_name** variable.  If using the optional Route53 PHZ, also define a unique value for **q_fqdn_name** for each cluster.
 
-### Inputs
+### Inputs Comparison
 Select between the minimalist **standard.tfvars** or the fully featured **advanced.tfvars**.  **Terraform.tfvars** is a copy of **advanced.tfvars** in this repository. These files all have extensive comments providing guidance on each variable.  The standard version makes many decisions for you to simplify the input process and deploy a Qumulo cluster with the software version of the Qumulo AMI.  The advanced version provides the flexibility that most production environments will require, as seen in the table below.
 
 |  | standard.tvfars | advanced.tvfars |
@@ -51,7 +60,7 @@ Select between the minimalist **standard.tfvars** or the fully featured **advanc
 | Customize Qumulo Admin Password | ✅ | ✅ |
 | Customize EC2 Instance Type | ✅ | ✅ |
 | Customize EC2 Instance Count | ✅ | ✅ |
-| Cuustomize Termination Protection | ✅ | ✅ |
+| Customize Termination Protection | ✅ | ✅ |
 | Customize Qumulo Cluster Name || ✅ |
 | Customize Qumulo Software Version || ✅ |
 | Customize Qumulo Sidecar Deployment || ✅ |
@@ -66,18 +75,186 @@ Select between the minimalist **standard.tfvars** or the fully featured **advanc
 | Optional: Set IAM Permissions Boundary || ✅ |
 | Optional: Set Environment Type || ✅ |
 
-### Outputs
+---
 
-| Name | Description |
-|------|-------------|
-| deployment_unique_name | The deployment_name with an appended 11 digit random alphanumeric |
-| qumulo_cluster_provisioned | Secondary provisioning of the cluster completed: Success/Failure |
-| qumulo_floating_ips | List of the floating IPs for the cluster |
-| qumulo_knowledge_base | Link to the Qumulo knowledge base |
-| qumulo_private_NFS | Private NFS path for the Qumulo cluster |
-| qumulo_private_SMB | Private SMB UNC path for the Qumulo cluster |
-| qumulo_private_url | Private URL for the Qumulo cluster |
-| qumulo_private_url_node1 | Link to the private IP for Qumulo cluster node 1 |
+## Standard Deployment Example
+
+```hcl
+module "qumulo_storage" {
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+
+    # ****************************** Required *************************************************************
+    # ***** Terraform Variables *****
+    # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+    #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+    deployment_name = "my-deployment-name"
+
+    # ***** S3 Bucket Variables *****
+    # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
+    # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
+    # s3_bucket_region                  - Region the S3 bucket is hosted in
+    s3_bucket_name   = "my-bucket"
+    s3_bucket_prefix = "my-prefix/"
+    s3_bucket_region = "us-west-2"
+
+    # ***** AWS Variables *****
+    # aws_region                        - Region for the deployment of the cluster
+    # aws_vpc_id                        - The VPC for the deployment within the provided region
+    # ec2_keypair                       - EC2 key pair within the region
+    # private_subnet_id                 - Private Subnet to deploy the cluster in
+    # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
+    aws_region        = "us-west-2"
+    aws_vpc_id        = "vpc-1234567890abcdefg"
+    ec2_key_pair      = "my-keypair"
+    private_subnet_id = "subnet-1234567890abcdefg"
+    term_protection   = true
+
+    # ***** Qumulo Cluster Variables *****
+    # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
+    # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge
+    # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
+    #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
+    #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
+    #                                       Custom-1TB-6PB or Specified-AMI-ID
+    q_cluster_admin_password = "!MyPwd123"
+    q_instance_type          = "m5.2xlarge"
+    q_marketplace_type       = "1TB-Usable-All-Flash"
+
+    # ***** Qumulo Sidecar Variables *****
+    # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
+    q_sidecar_version = "4.2.0"
+
+    # ****************************** Marketplace Type Selection Dependencies ******************************
+    # ***** Qumulo Cluster Config Options *****
+    # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
+    #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
+    #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
+    #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
+    # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
+    q_disk_config = null
+    q_node_count  = 0
+
+    # ****************************** Optional **************************************************************
+    # ***** Environment and Tag Options *****
+    # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
+    #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
+    #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
+    tags = null
+}
+```
+
+## Advanced Deployment Example
+
+```hcl
+module "qumulo_storage" {
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+
+    # ****************************** Required *************************************************************
+    # ***** Terraform Variables *****
+    # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+    #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+    deployment_name = "my-deployment-name"
+
+    # ***** S3 Bucket Variables *****
+    # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
+    # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
+    # s3_bucket_region                  - Region the S3 bucket is hosted in
+    s3_bucket_name   = "my-bucket"
+    s3_bucket_prefix = "my-prefix/"
+    s3_bucket_region = "us-west-2"
+
+    # ***** AWS Variables *****
+    # aws_region                        - Region for the deployment of the cluster
+    # aws_vpc_id                        - The VPC for the deployment within the provided region
+    # ec2_keypair                       - EC2 key pair within the region
+    # private_subnet_id                 - Private Subnet to deploy the cluster in
+    # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
+    aws_region        = "us-west-2"
+    aws_vpc_id        = "vpc-1234567890abcdefg"
+    ec2_key_pair      = "my-keypair"
+    private_subnet_id = "subnet-1234567890abcdefg"
+    term_protection   = true
+
+    # ***** Qumulo Cluster Variables *****
+    # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
+    # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
+    # q_cluster_version                 - Software version for creation >= 4.2.0.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
+    # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
+    # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
+    #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
+    #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
+    #                                       Custom-1TB-6PB or Specified-AMI-ID
+    q_cluster_admin_password = "!MyPwd123"
+    q_cluster_name           = "Cloud-Q"
+    q_cluster_version        = "5.0.1"
+    q_instance_type          = "m5.2xlarge"
+    q_marketplace_type       = "1TB-Usable-All-Flash"
+
+    # ***** Qumulo Sidecar Variables *****
+    # q_local_zone_or_outposts          - true if deploying the cluster in a local zone or on Outposts.
+    # q_sidecar_private_subnet_id       - Subnet in the Parent Region for the Sidecar Lambdas if deploying in a local zone or on Outposts.  
+    # q_sidecar_provision               - true to deploy the Sidecar Lambdas.  
+    # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
+    q_local_zone_or_outposts    = false
+    q_sidecar_private_subnet_id = null
+    q_sidecar_provision         = true
+    q_sidecar_version           = "5.0.1"
+
+    # ****************************** Marketplace Type Selection Dependencies ******************************
+    # ***** Qumulo Cluster Config Options *****
+    # q_ami_id                          - This ami-id is only used if 'q_marketplace_type' is set to 'Specified-AMI-ID' above
+    # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
+    #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
+    #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
+    #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
+    # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
+    q_ami_id      = null
+    q_disk_config = null
+    q_node_count  = 0
+
+    # ****************************** Optional **************************************************************
+    # ***** Environment and Tag Options *****
+    # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
+    # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
+    #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
+    #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
+    dev_environment = false
+    tags            = null
+
+    # ***** Qumulo Cluster Misc Options *****
+    # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default key will be used.
+    # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
+    # q_cluster_additional_sg_cidrs     - Comma delimited list of CIDRS to add too the Qumulo Cluster security group. 10.10.10.0/24, 10.11.30.0/24, etc
+    # q_floating_ips_per_node           - An integer value from 1 to 4 for IP failover protection and client distribution with DNS
+    # q_permissions_boundary            - Apply an IAM permission boundary policy to all created IAM roles. Policy Name not ARN.
+    kms_key_id                    = null
+    q_audit_logging               = false
+    q_cluster_additional_sg_cidrs = null
+    q_floating_ips_per_node       = 3
+    q_permissions_boundary        = null
+
+    # ***** SNS Options *****
+    # q_instance_recovery_topic         - Specify the SNS arn
+    # q_sidecar_ebs_replacement_topic   - Specify the SNS arn
+    q_instance_recovery_topic       = null
+    q_sidecar_ebs_replacement_topic = null
+
+    # ***** OPTIONAL module 'rout53-phz' *****
+    # q_fqdn_name                       - Specify an FQDN like companyname.local, for example
+    # q_record_name                     - The Record Name prefix should be specified if you plan to mix other records in the PHZ
+    # q_route53_provision               - true/false to provision the R53 PHZ
+    q_fqdn_name         = "my-dns-name.local"
+    q_record_name       = "qumulo"
+    q_route53_provision = false
+
+    # ***** OPTIONAL module 'nlb-management' *****
+    # ----- Init and apply 'nlb-management' after applying the root main.tf if you desire public management
+    # public_subnet_id                  - AWS public subnet ID
+    # q_public_replication_provision    - true/false to enable Qumulo replication port
+    public_subnet_id               = "subnet-1234567890abcdefg"
+    q_public_replication_provision = false
+}
+```
 
 ## Post-Deployment
 If you're using Qumulo Core version 4.3.0 or newer, you can populate data on your Qumulo cluster by copying data from an Amazon S3 bucket using [Qumulo Shift for Amazon S3](https://qumulo.com/wp-content/uploads/2020/06/ShiftForAWS_DataSheet.pdf).
@@ -92,6 +269,88 @@ For more information on Qumulo SHIFT, custom CloudWatch Dashboards, adding nodes
 |[Terraform: Supported Updates](./docs/tf-update-deployment.pdf)| Details on Terraform update options and examples, including adding instances (nodes) to the cluster and upgrading the Qumulo Sidecar.|
 |[Terraform: Provisioning Instance Functions](./docs/tf-provisioning-instance-functions.pdf)| Details on the functions of the provisioner instance.|
 |[Terraform: Destroying the Cluster](./docs/tf-destroy-deployment.pdf)| Details on backing up data, termination protection, and on cleaning up an AWS KMS customer managed key policy. |
+
+---
+
+## Documentation
+
+This repo is self documenting via Terraform Docs, please see the note at the bottom.
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.8 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 3.7 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_s3_bucket_object.provisioner_functions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
+| [aws_s3_bucket_object.provisioner_upgrades](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
+| [aws_ssm_parameter.nlb-management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [null_resource.name_lock](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [random_string.alphanumeric](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_aws_vpc_id"></a> [aws\_vpc\_id](#input\_aws\_vpc\_id) | AWS VPC identifier | `string` | n/a | yes |
+| <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | Name for this Terraform deployment.  This name plus 11 random hex digits will be used for all resource names where appropriate. | `string` | n/a | yes |
+| <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Enables the use of m5.xlarge instance type.  NOT recommended for production and overridden when not a development environment. | `bool` | `false` | no |
+| <a name="input_ec2_key_pair"></a> [ec2\_key\_pair](#input\_ec2\_key\_pair) | AWS EC2 key pair | `string` | n/a | yes |
+| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | OPTIONAL: AWS KMS encryption key identifier | `string` | `null` | no |
+| <a name="input_private_subnet_id"></a> [private\_subnet\_id](#input\_private\_subnet\_id) | AWS private subnet identifier | `string` | n/a | yes |
+| <a name="input_public_subnet_id"></a> [public\_subnet\_id](#input\_public\_subnet\_id) | OPTIONAL: Public Subnet ID for management NLB. | `string` | `null` | no |
+| <a name="input_q_ami_id"></a> [q\_ami\_id](#input\_q\_ami\_id) | OPTIONAL: Qumulo AMI-ID | `string` | `null` | no |
+| <a name="input_q_audit_logging"></a> [q\_audit\_logging](#input\_q\_audit\_logging) | OPTIONAL: Configure a CloudWatch Log group to store Audit logs from Qumulo | `bool` | `false` | no |
+| <a name="input_q_cluster_additional_sg_cidrs"></a> [q\_cluster\_additional\_sg\_cidrs](#input\_q\_cluster\_additional\_sg\_cidrs) | OPTIONAL: AWS additional security group CIDRs for the Qumulo cluster | `string` | `null` | no |
+| <a name="input_q_cluster_admin_password"></a> [q\_cluster\_admin\_password](#input\_q\_cluster\_admin\_password) | Qumulo cluster admin password | `string` | n/a | yes |
+| <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"Cloud-Q"` | no |
+| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"4.2.0"` | no |
+| <a name="input_q_disk_config"></a> [q\_disk\_config](#input\_q\_disk\_config) | OPTIONAL: Qumulo disk config | `string` | `null` | no |
+| <a name="input_q_floating_ips_per_node"></a> [q\_floating\_ips\_per\_node](#input\_q\_floating\_ips\_per\_node) | Qumulo floating IP addresses per node | `number` | `3` | no |
+| <a name="input_q_fqdn_name"></a> [q\_fqdn\_name](#input\_q\_fqdn\_name) | OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone | `string` | `null` | no |
+| <a name="input_q_instance_recovery_topic"></a> [q\_instance\_recovery\_topic](#input\_q\_instance\_recovery\_topic) | OPTIONAL: AWS SNS topic for Qumulo instance recovery | `string` | `null` | no |
+| <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo EC2 instance type | `string` | `"m5.2xlarge"` | no |
+| <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
+| <a name="input_q_marketplace_map"></a> [q\_marketplace\_map](#input\_q\_marketplace\_map) | Qumulo marketplace selection mapped to disk config, node count, and short name | <pre>map(object({<br>    DiskConfig = string<br>    NodeCount  = number<br>    ShortName  = string<br>  }))</pre> | <pre>{<br>  "103TB-Usable-All-Flash": {<br>    "DiskConfig": "30TB-AF",<br>    "NodeCount": 5,<br>    "ShortName": "103TB"<br>  },<br>  "12TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "5TB-Hybrid-st1",<br>    "NodeCount": 4,<br>    "ShortName": "12TB"<br>  },<br>  "1TB-Usable-All-Flash": {<br>    "DiskConfig": "600GiB-AF",<br>    "NodeCount": 4,<br>    "ShortName": "1TB"<br>  },<br>  "270TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "55TiB-Hybrid-st1",<br>    "NodeCount": "6",<br>    "ShortName": "270TB"<br>  },<br>  "809TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "160TiB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "809TB"<br>  },<br>  "96TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "20TB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "96TB"<br>  },<br>  "Custom-1TB-6PB": {<br>    "DiskConfig": "CUSTOM-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  },<br>  "Specified-AMI-ID": {<br>    "DiskConfig": "SPECIFIED-AMI-ID-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  }<br>}</pre> | no |
+| <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
+| <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `0` | no |
+| <a name="input_q_permissions_boundary"></a> [q\_permissions\_boundary](#input\_q\_permissions\_boundary) | OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model. | `string` | `null` | no |
+| <a name="input_q_public_replication_provision"></a> [q\_public\_replication\_provision](#input\_q\_public\_replication\_provision) | OPTIONAL: Enable port 3712 for replication from on-prem Qumulo systems using the public IP of the NLB for Qumulo Managment. Requires q\_public\_management\_provision=true above. | `bool` | `false` | no |
+| <a name="input_q_record_name"></a> [q\_record\_name](#input\_q\_record\_name) | OPTIONAL: The record name for the Route 53 Private Hosted Zone. This will add a prefix to the q\_fqdn\_name above | `string` | `null` | no |
+| <a name="input_q_route53_provision"></a> [q\_route53\_provision](#input\_q\_route53\_provision) | Optional: Configure Route 53 DNS for Floating IPs. | `bool` | `false` | no |
+| <a name="input_q_sidecar_ebs_replacement_topic"></a> [q\_sidecar\_ebs\_replacement\_topic](#input\_q\_sidecar\_ebs\_replacement\_topic) | AWS SNS topic for Qumulo Sidecar replacement of a failed EBS volume. | `string` | `null` | no |
+| <a name="input_q_sidecar_private_subnet_id"></a> [q\_sidecar\_private\_subnet\_id](#input\_q\_sidecar\_private\_subnet\_id) | OPTIONAL: Private Subnet ID for Sidecar Lambdas if the cluster is being deployed in a local zone or on Outpost | `string` | `null` | no |
+| <a name="input_q_sidecar_provision"></a> [q\_sidecar\_provision](#input\_q\_sidecar\_provision) | Provision Qumulo Sidecar | `bool` | `true` | no |
+| <a name="input_q_sidecar_user_name"></a> [q\_sidecar\_user\_name](#input\_q\_sidecar\_user\_name) | Qumulo Sidecar username | `string` | `"SideCarUser"` | no |
+| <a name="input_q_sidecar_version"></a> [q\_sidecar\_version](#input\_q\_sidecar\_version) | Qumulo Sidecar software version | `string` | `"4.2.0"` | no |
+| <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | AWS S3 bucket name | `string` | n/a | yes |
+| <a name="input_s3_bucket_prefix"></a> [s3\_bucket\_prefix](#input\_s3\_bucket\_prefix) | AWS S3 bucket prefix (path).  Include a trailing slash (/) | `string` | n/a | yes |
+| <a name="input_s3_bucket_region"></a> [s3\_bucket\_region](#input\_s3\_bucket\_region) | AWS region the S3 bucket is hosted in | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Additional global tags | `map(string)` | `null` | no |
+| <a name="input_term_protection"></a> [term\_protection](#input\_term\_protection) | Enable Termination Protection | `bool` | `true` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_deployment_unique_name"></a> [deployment\_unique\_name](#output\_deployment\_unique\_name) | The unique name for this deployment. |
+| <a name="output_qumulo_cluster_provisioned"></a> [qumulo\_cluster\_provisioned](#output\_qumulo\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
+| <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records. |
+| <a name="output_qumulo_knowledge_base"></a> [qumulo\_knowledge\_base](#output\_qumulo\_knowledge\_base) | Qumulo knowledge base |
+| <a name="output_qumulo_private_NFS"></a> [qumulo\_private\_NFS](#output\_qumulo\_private\_NFS) | Private NFS path for the Qumulo cluster |
+| <a name="output_qumulo_private_SMB"></a> [qumulo\_private\_SMB](#output\_qumulo\_private\_SMB) | Private SMB UNC path for the Qumulo cluster |
+| <a name="output_qumulo_private_url"></a> [qumulo\_private\_url](#output\_qumulo\_private\_url) | Private URL for the Qumulo cluster |
+| <a name="output_qumulo_private_url_node1"></a> [qumulo\_private\_url\_node1](#output\_qumulo\_private\_url\_node1) | Link to private IP for Qumulo Cluster - Node 1 |
+
+---
 
 ## Help
 
@@ -111,33 +370,15 @@ Copyright © 2022 [Qumulo, Inc.](https://qumulo.com)
 
 See [LICENSE](LICENSE) for full details
 
-    MIT License
-    
-    Copyright (c) 2022 Qumulo, Inc.
-    
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-    
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-    
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-
 ## Trademarks
 
 All other trademarks referenced herein are the property of their respective owners.
 
 ### Contributors
 
- - [Dack Busch](https://github.com/dackbusch)
- - [Gokul Kupparaj](https://github.com/gokulku)
+- [Dack Busch](https://github.com/dackbusch)
+- [Gokul Kupparaj](https://github.com/gokulku)
+- [Wesley Kirkland](https://github.com/wesleykirklandsg) - Converted to a Terraform with automatic documentation
+
+Note, manual changes to the README will be overwritten when the documentation is updated. To update the documentation, run `terraform-docs -c .config/.terraform-docs.yml .`
+<!-- END_TF_DOCS -->
