@@ -34,4 +34,10 @@ resource "aws_cloudformation_stack" "sidecar" {
   }
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+
+  lifecycle {
+    ignore_changes = [
+      parameters, # Ignore parameters.password will always update - https://github.com/hashicorp/terraform-provider-aws/issues/10300, in theory parameters.Password should work but it doesn't.
+    ]
+  }
 }
