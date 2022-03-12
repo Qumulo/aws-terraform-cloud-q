@@ -135,10 +135,6 @@ variable "q_disk_config" {
   description = "OPTIONAL: Qumulo disk config"
   type        = string
   default     = null
-  # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
-  #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
-  #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
-  #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1  
   validation {
     condition = anytrue([
       var.q_disk_config == null,
@@ -270,7 +266,7 @@ variable "q_record_name" {
   }
 }
 variable "q_route53_provision" {
-  description = "Optional: Configure Route 53 DNS for Floating IPs."
+  description = "OPTIONAL: Configure Route 53 DNS for Floating IPs."
   type        = bool
   default     = false
 }
@@ -329,7 +325,7 @@ variable "s3_bucket_region" {
   nullable    = false
 }
 variable "tags" {
-  description = "Additional global tags"
+  description = "OPTIONAL: Additional global tags"
   type        = map(string)
   default     = null
 }
@@ -340,7 +336,7 @@ variable "term_protection" {
 }
 
 variable "q_marketplace_map" {
-  description = "Qumulo marketplace selection mapped to disk config, node count, and short name"
+  description = "NOT AN INPUT VARIABLE. Qumulo marketplace selection mapped to disk config, node count, and short name"
   type = map(object({
     DiskConfig = string
     NodeCount  = number

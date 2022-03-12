@@ -6,20 +6,14 @@
 Comprehensive Terraform to deploy a Qumulo cluster with 4 to 20 instances per the AWS Well Architected Framework.
 Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
 
-## Requirements
+## AWS Requirements
 
 This Terraform deploys Qumulo AMIs with [Qumulo Core Cloud Software](https://qumulo.com/product/cloud-products/) version `>= 4.2.0`
-* [Terraform](https://www.terraform.io/downloads) `>= 1.0.8`
-* [AWS Provider](https://github.com/hashicorp/terraform-provider-aws) `>= 3.7`
-* [HashiCorp/Random](https://github.com/hashicorp/terraform-provider-random) `>= 3.1`
-* [HashiCorp/Null](https://github.com/hashicorp/terraform-provider-null) `>= 3.1`
 
 A subscription to a Qumulo offer in [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?x=0&y=0&searchTerms=qumulo) is required.
 For private offers via the AWS Marketplace contact [Qumulo Sales](http://discover.qumulo.com/cloud-calc-contact.html).
 
 ## Planning the Deployment
-
-**IMPORTANT:** When cloning this repository specify the tagged release version because there may be breaking changes between releases. Example: git clone <repo_url> --branch <tag_name> --single-branch
 
 Reference Architecture:
 ![Ref Arch](./docs/qumulo-cloud-q-architecture_diagram.png)
@@ -39,20 +33,23 @@ For help planning the deployment see the table of documents below.
 
 ### Deployment Considerations
 
-* This is meant to be sourced as a module
+* You may deploy this as a module pinned to this repo or clone this repo and deploy in your local Terraform environment as a module or directly.
+* Pinning Example: git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3
+* Cloning Example: git clone https://github.com/Qumulo/aws-terraform-cloud-q.git --branch v3.3 --single-branch
+<br />
+
+**IMPORTANT:** When pinning or cloning this repository specify the tagged release version because there may be breaking changes between releases. If you want the latest, reference 'main' realizing there may be breaking changes for your deployment.
 
 ### Terraform Naming Guidance
-There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name** is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
+There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the example files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name**.  The **deployment_unique_name** will never change on subsequent Terraform applies.  All subsequent changes to **deployment_name** are ingored.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc.
 <br />
-### Terraform Naming Guidance
-There are a multitude of Terraform workflows from those that just use a default local workspace to those using Terraform Cloud with remote state.  The very first variable in the .tfvars files provided is **deployment_name**.  Some users may choose to make this the workspace name.  Other users may want the same deployment name in multiple workspaces. Regardless, a **deployment_unique_name** is generated that consists of the deployment name appended with an 11 digit random alphanumeric.  All resources are tagged with the **deployment_unique_name** and the **deployment_name** is the keeper for the random alphanumeric.  The **deployment_unique_name** will never change on subsequent Terraform applies as long as the **deployment_name** is left unchanged as recommended.  No matter your naming convention or how you choose to use Terraform, you will have your chosen name and uniquely named resources so no conflicts occur between NLBs, resource groups, cross-regional CloudWatch views, etc. <br />
-<br />
-**IMPORTANT:** If you are spinning up multiple clusters, create unique .tfvar files for them and a unique value for the **q_cluster_name** variable.  If using the optional Route53 PHZ, also define a unique value for **q_fqdn_name** for each cluster.
+
+**IMPORTANT:** If you are spinning up multiple clusters, define unique values for the **q_cluster_name** variable.  If using the optional Route53 PHZ, also define a unique value for **q_fqdn_name** for each cluster.
 
 ### Inputs Comparison
-Select between the minimalist **standard.tfvars** or the fully featured **advanced.tfvars**.  **Terraform.tfvars** is a copy of **advanced.tfvars** in this repository. These files all have extensive comments providing guidance on each variable.  The standard version makes many decisions for you to simplify the input process and deploy a Qumulo cluster with the software version of the Qumulo AMI.  The advanced version provides the flexibility that most production environments will require, as seen in the table below.
+Select between the minimalist **examples/standard.tf** or the fully featured **examples/advanced.tf**.  The file **terraform.tfvars** is a copy of the input values from **examples/advanced.tf** in this repository. These files all have extensive comments providing guidance on each variable.  The standard version makes many decisions for you to simplify the input process and deploy a Qumulo cluster with the software version of the Qumulo AMI.  The advanced version provides the flexibility that most production environments will require, as seen in the table below.
 
-|  | standard.tvfars | advanced.tvfars |
+|  | examples/standard.tf | examples/advanced.tf |
 |--|:---------------:|:---------------:|
 | Deploy in a Local Zone || ✅ |
 | Deploy on Outposts || ✅ |
@@ -77,11 +74,11 @@ Select between the minimalist **standard.tfvars** or the fully featured **advanc
 
 ---
 
-## Standard Deployment Example
+### Standard Deployment Example
 
 ```hcl
-module "qumulo_storage" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+module "qumulo_cloud_q" {
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3"
 
     # ****************************** Required *************************************************************
     # ***** Terraform Variables *****
@@ -143,11 +140,11 @@ module "qumulo_storage" {
 }
 ```
 
-## Advanced Deployment Example
+### Advanced Deployment Example
 
 ```hcl
-module "qumulo_storage" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+module "qumulo_cloud_q" {
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3"
 
     # ****************************** Required *************************************************************
     # ***** Terraform Variables *****
@@ -272,9 +269,9 @@ For more information on Qumulo SHIFT, custom CloudWatch Dashboards, adding nodes
 
 ---
 
-## Documentation
+## Terraform Documentation
 
-This repo is self documenting via Terraform Docs, please see the note at the bottom.
+This repo is self documenting via Terraform-Docs.
 
 ## Requirements
 
@@ -284,16 +281,6 @@ This repo is self documenting via Terraform Docs, please see the note at the bot
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 3.7 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [aws_s3_bucket_object.provisioner_functions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
-| [aws_s3_bucket_object.provisioner_upgrades](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_object) | resource |
-| [aws_ssm_parameter.nlb-management](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
-| [null_resource.name_lock](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [random_string.alphanumeric](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 
 ## Inputs
 
@@ -319,13 +306,13 @@ This repo is self documenting via Terraform Docs, please see the note at the bot
 | <a name="input_q_instance_recovery_topic"></a> [q\_instance\_recovery\_topic](#input\_q\_instance\_recovery\_topic) | OPTIONAL: AWS SNS topic for Qumulo instance recovery | `string` | `null` | no |
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo EC2 instance type | `string` | `"m5.2xlarge"` | no |
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
-| <a name="input_q_marketplace_map"></a> [q\_marketplace\_map](#input\_q\_marketplace\_map) | Qumulo marketplace selection mapped to disk config, node count, and short name | <pre>map(object({<br>    DiskConfig = string<br>    NodeCount  = number<br>    ShortName  = string<br>  }))</pre> | <pre>{<br>  "103TB-Usable-All-Flash": {<br>    "DiskConfig": "30TB-AF",<br>    "NodeCount": 5,<br>    "ShortName": "103TB"<br>  },<br>  "12TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "5TB-Hybrid-st1",<br>    "NodeCount": 4,<br>    "ShortName": "12TB"<br>  },<br>  "1TB-Usable-All-Flash": {<br>    "DiskConfig": "600GiB-AF",<br>    "NodeCount": 4,<br>    "ShortName": "1TB"<br>  },<br>  "270TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "55TiB-Hybrid-st1",<br>    "NodeCount": "6",<br>    "ShortName": "270TB"<br>  },<br>  "809TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "160TiB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "809TB"<br>  },<br>  "96TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "20TB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "96TB"<br>  },<br>  "Custom-1TB-6PB": {<br>    "DiskConfig": "CUSTOM-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  },<br>  "Specified-AMI-ID": {<br>    "DiskConfig": "SPECIFIED-AMI-ID-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  }<br>}</pre> | no |
+| <a name="input_q_marketplace_map"></a> [q\_marketplace\_map](#input\_q\_marketplace\_map) | NOT AN INPUT VARIABLE. Qumulo marketplace selection mapped to disk config, node count, and short name | <pre>map(object({<br>    DiskConfig = string<br>    NodeCount  = number<br>    ShortName  = string<br>  }))</pre> | <pre>{<br>  "103TB-Usable-All-Flash": {<br>    "DiskConfig": "30TB-AF",<br>    "NodeCount": 5,<br>    "ShortName": "103TB"<br>  },<br>  "12TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "5TB-Hybrid-st1",<br>    "NodeCount": 4,<br>    "ShortName": "12TB"<br>  },<br>  "1TB-Usable-All-Flash": {<br>    "DiskConfig": "600GiB-AF",<br>    "NodeCount": 4,<br>    "ShortName": "1TB"<br>  },<br>  "270TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "55TiB-Hybrid-st1",<br>    "NodeCount": "6",<br>    "ShortName": "270TB"<br>  },<br>  "809TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "160TiB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "809TB"<br>  },<br>  "96TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "20TB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "96TB"<br>  },<br>  "Custom-1TB-6PB": {<br>    "DiskConfig": "CUSTOM-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  },<br>  "Specified-AMI-ID": {<br>    "DiskConfig": "SPECIFIED-AMI-ID-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  }<br>}</pre> | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
 | <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `0` | no |
 | <a name="input_q_permissions_boundary"></a> [q\_permissions\_boundary](#input\_q\_permissions\_boundary) | OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model. | `string` | `null` | no |
 | <a name="input_q_public_replication_provision"></a> [q\_public\_replication\_provision](#input\_q\_public\_replication\_provision) | OPTIONAL: Enable port 3712 for replication from on-prem Qumulo systems using the public IP of the NLB for Qumulo Managment. Requires q\_public\_management\_provision=true above. | `bool` | `false` | no |
 | <a name="input_q_record_name"></a> [q\_record\_name](#input\_q\_record\_name) | OPTIONAL: The record name for the Route 53 Private Hosted Zone. This will add a prefix to the q\_fqdn\_name above | `string` | `null` | no |
-| <a name="input_q_route53_provision"></a> [q\_route53\_provision](#input\_q\_route53\_provision) | Optional: Configure Route 53 DNS for Floating IPs. | `bool` | `false` | no |
+| <a name="input_q_route53_provision"></a> [q\_route53\_provision](#input\_q\_route53\_provision) | OPTIONAL: Configure Route 53 DNS for Floating IPs. | `bool` | `false` | no |
 | <a name="input_q_sidecar_ebs_replacement_topic"></a> [q\_sidecar\_ebs\_replacement\_topic](#input\_q\_sidecar\_ebs\_replacement\_topic) | AWS SNS topic for Qumulo Sidecar replacement of a failed EBS volume. | `string` | `null` | no |
 | <a name="input_q_sidecar_private_subnet_id"></a> [q\_sidecar\_private\_subnet\_id](#input\_q\_sidecar\_private\_subnet\_id) | OPTIONAL: Private Subnet ID for Sidecar Lambdas if the cluster is being deployed in a local zone or on Outpost | `string` | `null` | no |
 | <a name="input_q_sidecar_provision"></a> [q\_sidecar\_provision](#input\_q\_sidecar\_provision) | Provision Qumulo Sidecar | `bool` | `true` | no |
@@ -334,7 +321,7 @@ This repo is self documenting via Terraform Docs, please see the note at the bot
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | AWS S3 bucket name | `string` | n/a | yes |
 | <a name="input_s3_bucket_prefix"></a> [s3\_bucket\_prefix](#input\_s3\_bucket\_prefix) | AWS S3 bucket prefix (path).  Include a trailing slash (/) | `string` | n/a | yes |
 | <a name="input_s3_bucket_region"></a> [s3\_bucket\_region](#input\_s3\_bucket\_region) | AWS region the S3 bucket is hosted in | `string` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Additional global tags | `map(string)` | `null` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | OPTIONAL: Additional global tags | `map(string)` | `null` | no |
 | <a name="input_term_protection"></a> [term\_protection](#input\_term\_protection) | Enable Termination Protection | `bool` | `true` | no |
 
 ## Outputs
@@ -376,9 +363,7 @@ All other trademarks referenced herein are the property of their respective owne
 
 ### Contributors
 
-- [Dack Busch](https://github.com/dackbusch)
-- [Gokul Kupparaj](https://github.com/gokulku)
-- [Wesley Kirkland](https://github.com/wesleykirklandsg) - Converted to a Terraform with automatic documentation
-
-Note, manual changes to the README will be overwritten when the documentation is updated. To update the documentation, run `terraform-docs -c .config/.terraform-docs.yml .`
+- [Dack Busch](https://github.com/dackbusch) - Co-creator
+- [Gokul Kupparaj](https://github.com/gokulku) - Co-creator
+- [Wesley Kirkland](https://github.com/wesleykirklandsg) - Added Terraform automatic documentation
 <!-- END_TF_DOCS -->
