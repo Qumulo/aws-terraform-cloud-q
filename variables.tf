@@ -231,7 +231,7 @@ variable "q_marketplace_type" {
       var.q_marketplace_type == "103TB-Usable-All-Flash",
       var.q_marketplace_type == "270TB-Usable-Hybrid-st1",
       var.q_marketplace_type == "809TB-Usable-Hybrid-st1",
-      var.q_marketplace_type == "Custom-1TB-6PB ",
+      var.q_marketplace_type == "Custom-1TB-6PB",
       var.q_marketplace_type == "Specified-AMI-ID"
     ])
     error_message = "The q_marketplace_type must be 1TB-Usable-All-Flash, 12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 103TB-Usable-All-Flash, 270TB-Usable-Hybrid-st1, 809TB-Usable-Hybrid-st1, Custom-1TB-6PB, or Specified-AMI-ID offering. Choose the appropriate offering."
