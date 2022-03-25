@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3"
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.4"
 
     # ****************************** Required *************************************************************
     # ***** Terraform Variables *****
@@ -58,4 +58,8 @@ module "qumulo_cloud_q" {
     #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
     #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
     tags = null
+}
+
+output "outputs_qumulo_cloud_q" {
+  value = module.qumulo_cloud_q
 }

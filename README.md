@@ -78,7 +78,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3"
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.4"
 
     # ****************************** Required *************************************************************
     # ***** Terraform Variables *****
@@ -138,13 +138,17 @@ module "qumulo_cloud_q" {
     #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
     tags = null
 }
+
+output "outputs_qumulo_cloud_q" {
+  value = module.qumulo_cloud_q
+}
 ```
 
 ### Advanced Deployment Example
 
 ```hcl
 module "qumulo_cloud_q" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.3"
+    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.4"
 
     # ****************************** Required *************************************************************
     # ***** Terraform Variables *****
@@ -183,7 +187,7 @@ module "qumulo_cloud_q" {
     #                                       Custom-1TB-6PB or Specified-AMI-ID
     q_cluster_admin_password = "!MyPwd123"
     q_cluster_name           = "Cloud-Q"
-    q_cluster_version        = "5.0.1"
+    q_cluster_version        = "5.0.3"
     q_instance_type          = "m5.2xlarge"
     q_marketplace_type       = "1TB-Usable-All-Flash"
 
@@ -195,7 +199,7 @@ module "qumulo_cloud_q" {
     q_local_zone_or_outposts    = false
     q_sidecar_private_subnet_id = null
     q_sidecar_provision         = true
-    q_sidecar_version           = "5.0.1"
+    q_sidecar_version           = "5.0.3"
 
     # ****************************** Marketplace Type Selection Dependencies ******************************
     # ***** Qumulo Cluster Config Options *****
@@ -250,6 +254,10 @@ module "qumulo_cloud_q" {
     # q_public_replication_provision    - true/false to enable Qumulo replication port
     public_subnet_id               = "subnet-1234567890abcdefg"
     q_public_replication_provision = false
+}
+
+output "outputs_qumulo_cloud_q" {
+  value = module.qumulo_cloud_q
 }
 ```
 
