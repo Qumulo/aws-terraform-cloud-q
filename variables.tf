@@ -335,7 +335,7 @@ variable "q_sidecar_user_name" {
 variable "q_sidecar_version" {
   description = "Qumulo Sidecar software version"
   type        = string
-  default     = "4.2.0"
+  default     = "5.1.0.1"
   nullable    = false
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?))$", var.q_sidecar_version))

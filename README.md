@@ -8,7 +8,7 @@ Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
 
 ## AWS Requirements
 
-This Terraform deploys Qumulo AMIs with [Qumulo Core Cloud Software](https://qumulo.com/product/cloud-products/) version `>= 4.2.0`
+This Terraform deploys Qumulo AMIs with [Qumulo Core Cloud Software](https://qumulo.com/product/cloud-products/) version `>= 5.1.0.1`
 
 A subscription to a Qumulo offer in [AWS Marketplace](https://aws.amazon.com/marketplace/search/results?x=0&y=0&searchTerms=qumulo) is required.
 For private offers via the AWS Marketplace contact [Qumulo Sales](http://discover.qumulo.com/cloud-calc-contact.html).
@@ -259,7 +259,7 @@ module "qumulo_cloud_q" {
   # public_subnet_id                  - AWS public subnet ID
   # q_public_replication_provision    - true/false to enable Qumulo replication port
   public_subnet_id               = "subnet-1234567890abcdefg"
-  q_public_replication_provision = false
+  q_public_replication_provision = false  
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -333,7 +333,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_sidecar_private_subnet_id"></a> [q\_sidecar\_private\_subnet\_id](#input\_q\_sidecar\_private\_subnet\_id) | OPTIONAL: Private Subnet ID for Sidecar Lambdas if the cluster is being deployed in a local zone or on Outpost | `string` | `null` | no |
 | <a name="input_q_sidecar_provision"></a> [q\_sidecar\_provision](#input\_q\_sidecar\_provision) | Provision Qumulo Sidecar | `bool` | `true` | no |
 | <a name="input_q_sidecar_user_name"></a> [q\_sidecar\_user\_name](#input\_q\_sidecar\_user\_name) | Qumulo Sidecar username | `string` | `"SideCarUser"` | no |
-| <a name="input_q_sidecar_version"></a> [q\_sidecar\_version](#input\_q\_sidecar\_version) | Qumulo Sidecar software version | `string` | `"4.2.0"` | no |
+| <a name="input_q_sidecar_version"></a> [q\_sidecar\_version](#input\_q\_sidecar\_version) | Qumulo Sidecar software version | `string` | `"5.1.0.1"` | no |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | AWS S3 bucket name | `string` | n/a | yes |
 | <a name="input_s3_bucket_prefix"></a> [s3\_bucket\_prefix](#input\_s3\_bucket\_prefix) | AWS S3 bucket prefix (path).  Include a trailing slash (/) | `string` | n/a | yes |
 | <a name="input_s3_bucket_region"></a> [s3\_bucket\_region](#input\_s3\_bucket\_region) | AWS region the S3 bucket is hosted in | `string` | n/a | yes |
