@@ -30,7 +30,7 @@ module "qumulo_cloud_q" {
   # ***** Qumulo Cluster Variables *****
   # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
   # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
-  # q_cluster_version                 - Software version for creation >= 4.2.0.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
+  # q_cluster_version                 - Software version for creation >= 5.1.0.1.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
   # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
   # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
   #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
