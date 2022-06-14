@@ -313,7 +313,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_cluster_additional_sg_cidrs"></a> [q\_cluster\_additional\_sg\_cidrs](#input\_q\_cluster\_additional\_sg\_cidrs) | OPTIONAL: AWS additional security group CIDRs for the Qumulo cluster | `string` | `null` | no |
 | <a name="input_q_cluster_admin_password"></a> [q\_cluster\_admin\_password](#input\_q\_cluster\_admin\_password) | Qumulo cluster admin password | `string` | n/a | yes |
 | <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"Cloud-Q"` | no |
-| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"4.2.0"` | no |
+| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"5.1.0.1"` | no |
 | <a name="input_q_disk_config"></a> [q\_disk\_config](#input\_q\_disk\_config) | OPTIONAL: Qumulo disk config | `string` | `null` | no |
 | <a name="input_q_flash_iops"></a> [q\_flash\_iops](#input\_q\_flash\_iops) | OPTIONAL: Specify the iops for gp3 | `number` | `3000` | no |
 | <a name="input_q_flash_tput"></a> [q\_flash\_tput](#input\_q\_flash\_tput) | OPTIONAL: Specify the throughput, in MB/s, for gp3 | `number` | `250` | no |
