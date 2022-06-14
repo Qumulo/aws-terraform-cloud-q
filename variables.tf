@@ -115,10 +115,10 @@ variable "q_cluster_name" {
 variable "q_cluster_version" {
   description = "Qumulo cluster software version"
   type        = string
-  default     = "4.2.0"
+  default     = "5.1.0.1"
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?))$", var.q_cluster_version))
-    error_message = "The q_cluster_version 4.2.0 or greater. Examples: 4.2.1, 5.0.0.1, 5.3.10."
+    error_message = "The q_cluster_version 5.1.0.1 or greater. Examples: 5.1.0.1, 5.1.2, 5.3.10."
   }
 }
 variable "q_cluster_admin_password" {
@@ -339,7 +339,7 @@ variable "q_sidecar_version" {
   nullable    = false
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?))$", var.q_sidecar_version))
-    error_message = "The q_sidecar_version 4.2.0 or greater. Examples: 4.2.1, 5.0.0.1, 5.3.10.  It also should match the version running on the cluster."
+    error_message = "The q_sidecar_version 5.1.0.1 or greater. Examples: 5.1.0.1, 5.1.2, 5.3.10.  It also should match the version running on the cluster."
   }
 }
 variable "q_sidecar_ebs_replacement_topic" {
