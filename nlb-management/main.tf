@@ -37,7 +37,7 @@ locals {
   aws_vpc_id                   = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["aws_vpc_id"]
   cluster_primary_ips          = toset(jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["cluster_primary_ips"])
   public_replication_provision = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_replication_provision"]
-  public_subnet_id             = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_subnet_id"]
+  public_subnet_ids            = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_subnet_ids"]
   random_alphanumeric          = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["random_alphanumeric"]
   tags                         = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["tags"]
 }
@@ -47,12 +47,9 @@ resource "aws_lb" "mgmt_nlb" {
   internal           = false
   ip_address_type    = "ipv4"
   load_balancer_type = "network"
+  subnets            = local.public_subnet_ids
 
-  subnet_mapping {
-    subnet_id = local.public_subnet_id
-  }
-
-  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
+  tags = merge(local.tags, { Name = "${local.deployment_unique_name}-Qumulo Public Management NLB" })
 }
 
 resource "aws_lb_target_group" "port_443" {

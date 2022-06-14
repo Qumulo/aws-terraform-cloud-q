@@ -37,7 +37,8 @@ s3bkt="${bucket_name}"
 upgrade_s3pfx="${upgrade_s3_prefix}"
 functions_s3pfx="${functions_s3_prefix}"
 serverIP=$(hostname -I | xargs)
-this_ec2=$(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)
+token=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+this_ec2=$(curl -H "X-aws-ec2-metadata-token: $token" -v http://169.254.169.254/latest/meta-data/instance-id)
 sc_prov="NO"
 cmk_prov="NO"
 mod_FIPs="NO"
@@ -47,17 +48,17 @@ nodes_down="${max_nodes_down}"
 mod_overness="${mod_overness}"
 num_azs="${number_azs}"
 
-if [ $(curl -sI -w "%%{http_code}\\n" "s3.$region.amazonaws.com" -o /dev/null --connect-timeout 3 --max-time 20) == "405" ]; then
+if [ $(curl -sI -w "%%{http_code}\\n" "s3.$region.amazonaws.com" -o /dev/null --connect-timeout 10 --retry 10 --retry-delay 5 --max-time 200) == "405" ]; then
   echo "S3 Reachable"
 else
   echo "S3 Unreachable"
   exit 1
 fi
 
-if [[ ! -e "functions-v5.sh" ]]; then
-  aws s3 cp s3://$bkt_pfx"functions-v5.sh" ./functions-v5.sh --quiet
+if [[ ! -e "functions-v6.sh" ]]; then
+  aws s3 cp s3://$bkt_pfx"functions-v6.sh" ./functions-v6.sh
 fi
-source functions-v5.sh
+source functions-v6.sh
 
 if [ $(chkurl "google.com"; echo $?) -eq 1 ]; then
   ssmput "last-run-status" "$region" "$stkname" "BOOTED. Internet UP."
@@ -80,6 +81,12 @@ if yum list installed "jq" >/dev/null 2>&1; then
 else
   yum install -y jq
 fi
+
+if yum list installed "wget" >/dev/null 2>&1; then
+  echo "wget exists"
+else
+  yum install -y wget
+fi    
 
 if yum list installed "nginx.x86_64" >/dev/null 2>&1; then
   echo "nginx exists"

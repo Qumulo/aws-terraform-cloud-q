@@ -56,8 +56,10 @@ locals {
   working_ebs_block_devices = [
     for i in range(lookup(var.disk_map[var.disk_config], "workingSlots")) : {
       device_name = local.device_names[i]
-      volume_type = lookup(var.disk_map[var.disk_config], "workingType")
+      volume_type = var.flash_type
       volume_size = lookup(var.disk_map[var.disk_config], "workingSize")
+      volume_tput = var.flash_type == "gp2" ? null : var.flash_tput
+      volume_iops = var.flash_type == "gp2" ? null : var.flash_iops
     }
   ]
 
@@ -66,6 +68,8 @@ locals {
       device_name = local.device_names[i + lookup(var.disk_map[var.disk_config], "workingSlots")]
       volume_type = lookup(var.disk_map[var.disk_config], "backingType")
       volume_size = lookup(var.disk_map[var.disk_config], "backingSize")
+      volume_tput = null
+      volume_iops = null
     }
   ]
 
@@ -269,7 +273,7 @@ EOF
 
 resource "aws_placement_group" "cluster" {
   name     = var.deployment_unique_name
-  strategy = "cluster"
+  strategy = var.aws_number_azs == 1 ? "cluster" : "spread"
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
@@ -279,7 +283,7 @@ resource "aws_network_interface" "node" {
 
   private_ips_count = var.floating_ips_per_node
   security_groups   = [aws_security_group.cluster.id]
-  subnet_id         = var.private_subnet_id
+  subnet_id         = var.private_subnet_ids[count.index]
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}-node ${count.index + 1}" })
 }
@@ -318,9 +322,17 @@ resource "aws_instance" "node" {
       kms_key_id  = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
       volume_type = ebs_block_device.value.volume_type
       volume_size = ebs_block_device.value.volume_size
+      throughput  = ebs_block_device.value.volume_tput
+      iops        = ebs_block_device.value.volume_iops
 
       tags = merge(var.tags, { Name = "${var.deployment_unique_name}-${ebs_block_device.value.volume_type}" })
     }
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 3
+    http_tokens                 = var.require_imdsv2 ? "required" : "optional"
   }
 
   lifecycle {

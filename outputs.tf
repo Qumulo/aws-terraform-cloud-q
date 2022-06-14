@@ -66,6 +66,9 @@ output "qumulo_private_url_node1" {
 output "outputs_secret_module" {
   value = module.secrets
 }
+output "outputs_qconfig_module" {
+  value = module.qconfig
+}
 output "outputs_qami-id-lookup_module" {
   value = module.qami-id-lookup
 }

@@ -248,18 +248,6 @@ resource "aws_ssm_parameter" "cmk-policy-modified" {
   value = "null"
   lifecycle { ignore_changes = [value] }
 }
-resource "aws_ssm_parameter" "creation-number-azs" {
-  name  = "/qumulo/${var.deployment_unique_name}/creation-number-AZs"
-  type  = "String"
-  value = "null"
-  lifecycle { ignore_changes = [value] }
-}
-resource "aws_ssm_parameter" "max-nodes-down" {
-  name  = "/qumulo/${var.deployment_unique_name}/max-nodes-down"
-  type  = "String"
-  value = "null"
-  lifecycle { ignore_changes = [value] }
-}
 
 resource "aws_network_interface" "provisioner" {
   security_groups = [aws_security_group.provisioner.id]
@@ -313,6 +301,12 @@ resource "aws_instance" "provisioner" {
     volume_size = 40
 
     tags = merge(var.tags, { Name = "${var.deployment_unique_name}-provisioner" })
+  }
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_put_response_hop_limit = 3
+    http_tokens                 = var.require_imdsv2 ? "required" : "optional"
   }
 
   lifecycle {

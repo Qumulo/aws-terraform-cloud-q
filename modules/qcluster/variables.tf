@@ -28,6 +28,10 @@ variable "aws_account_id" {
   description = "AWS account ID"
   type        = string
 }
+variable "aws_number_azs" {
+  description = "AWS Number of AZs"
+  type        = number
+}
 variable "aws_partition" {
   description = "AWS partition"
   type        = string
@@ -64,6 +68,18 @@ variable "floating_ips_per_node" {
   description = "Qumulo floating IP addresses per node"
   type        = number
 }
+variable "flash_type" {
+  description = "OPTIONAL: Specify the type of EBS flash"
+  type        = string
+}
+variable "flash_tput" {
+  description = "OPTIONAL: Specify the throughput, in MB/s, for gp3"
+  type        = number
+}
+variable "flash_iops" {
+  description = "OPTIONAL: Specify the iops for gp3"
+  type        = number
+}
 variable "instance_recovery_topic" {
   description = "AWS SNS topic for Qumulo instance recovery"
   type        = string
@@ -84,9 +100,13 @@ variable "permissions_boundary" {
   description = "OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluste. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model."
   type        = string
 }
-variable "private_subnet_id" {
-  description = "AWS private subnet identifier"
-  type        = string
+variable "private_subnet_ids" {
+  description = "AWS private subnet identifiers"
+  type        = list(string)
+}
+variable "require_imdsv2" {
+  description = "Force all Instance Metadata Service Requests to us v2 Tokens"
+  type        = bool
 }
 variable "tags" {
   description = "Additional global tags"
@@ -96,13 +116,11 @@ variable "term_protection" {
   description = "Enable Termination Protection"
   type        = bool
 }
-
 variable "disk_map" {
   description = "This map is used to build the disk configuration for each Qumulo node. It maps working SSDs and backing HDDs in the correct numbers and sizes to the correct slots"
   type = map(object({
     slotCount : number
     workingSlots : number
-    workingType : string
     workingSize : number
     backingSlots : number
     backingType : string
@@ -112,7 +130,6 @@ variable "disk_map" {
     "600GiB-AF" = {
       slotCount    = 6
       workingSlots = 6
-      workingType  = "gp2"
       workingSize  = 100
       backingSlots = 0
       backingType  = "none"
@@ -121,7 +138,6 @@ variable "disk_map" {
     "1TB-AF" = {
       slotCount    = 8
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 128
       backingSlots = 0
       backingType  = "none"
@@ -130,7 +146,6 @@ variable "disk_map" {
     "5TB-AF" = {
       slotCount    = 10
       workingSlots = 10
-      workingType  = "gp2"
       workingSize  = 500
       backingSlots = 0
       backingType  = "none"
@@ -139,7 +154,6 @@ variable "disk_map" {
     "8TiB-AF" = {
       slotCount    = 16
       workingSlots = 16
-      workingType  = "gp2"
       workingSize  = 512
       backingSlots = 0
       backingType  = "none"
@@ -148,7 +162,6 @@ variable "disk_map" {
     "13TiB-AF" = {
       slotCount    = 25
       workingSlots = 25
-      workingType  = "gp2"
       workingSize  = 533
       backingSlots = 0
       backingType  = "none"
@@ -157,7 +170,6 @@ variable "disk_map" {
     "20TiB-AF" = {
       slotCount    = 25
       workingSlots = 25
-      workingType  = "gp2"
       workingSize  = 820
       backingSlots = 0
       backingType  = "none"
@@ -166,7 +178,6 @@ variable "disk_map" {
     "30TB-AF" = {
       slotCount    = 8
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 3750
       backingSlots = 0
       backingType  = "none"
@@ -175,7 +186,6 @@ variable "disk_map" {
     "35TiB-AF" = {
       slotCount    = 25
       workingSlots = 25
-      workingType  = "gp2"
       workingSize  = 1434
       backingSlots = 0
       backingType  = "none"
@@ -184,7 +194,6 @@ variable "disk_map" {
     "55TiB-AF" = {
       slotCount    = 25
       workingSlots = 25
-      workingType  = "gp2"
       workingSize  = 2253
       backingSlots = 0
       backingType  = "none"
@@ -193,7 +202,6 @@ variable "disk_map" {
     "5TB-Hybrid-st1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 100
       backingSlots = 10
       backingType  = "st1"
@@ -202,7 +210,6 @@ variable "disk_map" {
     "8TiB-Hybrid-st1" = {
       slotCount    = 12
       workingSlots = 4
-      workingType  = "gp2"
       workingSize  = 150
       backingSlots = 8
       backingType  = "st1"
@@ -211,7 +218,6 @@ variable "disk_map" {
     "13TiB-Hybrid-st1" = {
       slotCount    = 12
       workingSlots = 4
-      workingType  = "gp2"
       workingSize  = 175
       backingSlots = 8
       backingType  = "st1"
@@ -220,7 +226,6 @@ variable "disk_map" {
     "20TB-Hybrid-st1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 160
       backingSlots = 10
       backingType  = "st1"
@@ -229,7 +234,6 @@ variable "disk_map" {
     "35TiB-Hybrid-st1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 350
       backingSlots = 10
       backingType  = "st1"
@@ -238,7 +242,6 @@ variable "disk_map" {
     "55TiB-Hybrid-st1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 550
       backingSlots = 10
       backingType  = "st1"
@@ -247,7 +250,6 @@ variable "disk_map" {
     "90TiB-Hybrid-st1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 900
       backingSlots = 10
       backingType  = "st1"
@@ -256,7 +258,6 @@ variable "disk_map" {
     "160TiB-Hybrid-st1" = {
       slotCount    = 24
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 1000
       backingSlots = 16
       backingType  = "st1"
@@ -265,7 +266,6 @@ variable "disk_map" {
     "256TiB-Hybrid-st1" = {
       slotCount    = 24
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 1600
       backingSlots = 16
       backingType  = "st1"
@@ -274,7 +274,6 @@ variable "disk_map" {
     "320TiB-Hybrid-st1" = {
       slotCount    = 25
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 2500
       backingSlots = 20
       backingType  = "st1"
@@ -283,7 +282,6 @@ variable "disk_map" {
     "8TiB-Hybrid-sc1" = {
       slotCount    = 12
       workingSlots = 4
-      workingType  = "gp2"
       workingSize  = 150
       backingSlots = 8
       backingType  = "sc1"
@@ -292,7 +290,6 @@ variable "disk_map" {
     "13TiB-Hybrid-sc1" = {
       slotCount    = 12
       workingSlots = 4
-      workingType  = "gp2"
       workingSize  = 175
       backingSlots = 8
       backingType  = "sc1"
@@ -301,7 +298,6 @@ variable "disk_map" {
     "20TB-Hybrid-sc1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 160
       backingSlots = 10
       backingType  = "sc1"
@@ -310,7 +306,6 @@ variable "disk_map" {
     "35TiB-Hybrid-sc1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 350
       backingSlots = 10
       backingType  = "sc1"
@@ -319,7 +314,6 @@ variable "disk_map" {
     "55TiB-Hybrid-sc1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 550
       backingSlots = 10
       backingType  = "sc1"
@@ -328,7 +322,6 @@ variable "disk_map" {
     "90TiB-Hybrid-sc1" = {
       slotCount    = 15
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 900
       backingSlots = 10
       backingType  = "sc1"
@@ -337,7 +330,6 @@ variable "disk_map" {
     "160TiB-Hybrid-sc1" = {
       slotCount    = 24
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 1000
       backingSlots = 16
       backingType  = "sc1"
@@ -346,7 +338,6 @@ variable "disk_map" {
     "256TiB-Hybrid-sc1" = {
       slotCount    = 24
       workingSlots = 8
-      workingType  = "gp2"
       workingSize  = 1600
       backingSlots = 16
       backingType  = "sc1"
@@ -355,7 +346,6 @@ variable "disk_map" {
     "320TiB-Hybrid-sc1" = {
       slotCount    = 25
       workingSlots = 5
-      workingType  = "gp2"
       workingSize  = 2500
       backingSlots = 20
       backingType  = "sc1"

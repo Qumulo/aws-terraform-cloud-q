@@ -20,20 +20,15 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-resource "aws_route53_zone" "qumulo_hosted_zone" {
-  name = var.fqdn_name
-
-  vpc {
-    vpc_id = var.aws_vpc_id
-  }
-
-  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+output "nlb_url" {
+  description = "Link to the Qumulo NLB"
+  value       = "https://${aws_lb.int_nlb.dns_name}"
 }
-
-resource "aws_route53_record" "qumulo_fips" {
-  name    = var.record_name
-  records = toset(var.cluster_floating_ips)
-  ttl     = "1"
-  type    = "A"
-  zone_id = aws_route53_zone.qumulo_hosted_zone.zone_id
+output "nlb_nfs" {
+  description = "NFS Mount path for the Qumulo NLB"
+  value       = "${aws_lb.int_nlb.dns_name}:/<NFS Export Name>"
+}
+output "nlb_smb" {
+  description = "SMB UNC path for the Qumulo NLB"
+  value       = "\\${aws_lb.int_nlb.dns_name}\\<SMB Share Name>"
 }

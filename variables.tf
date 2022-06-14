@@ -170,6 +170,36 @@ variable "q_disk_config" {
     error_message = "An invalid EBS disk config was specified. See the .tfvars file comments for valid disk config strings."
   }
 }
+variable "q_flash_type" {
+  description = "OPTIONAL: Specify the type of EBS flash"
+  type        = string
+  default     = "gp3"
+  validation {
+    condition = anytrue([
+      var.q_flash_type == "gp2",
+      var.q_flash_type == "gp3"
+    ])
+    error_message = "An invalid EBS flash type was specified. Must be gp2 or gp3."
+  }
+}
+variable "q_flash_tput" {
+  description = "OPTIONAL: Specify the throughput, in MB/s, for gp3"
+  type        = number
+  default     = 250
+  validation {
+    condition     = var.q_flash_tput >= 125 && var.q_flash_tput <= 1000
+    error_message = "EBS gp3 throughput must be in the range of 125 to 1000 MB/s."
+  }
+}
+variable "q_flash_iops" {
+  description = "OPTIONAL: Specify the iops for gp3"
+  type        = number
+  default     = 3000
+  validation {
+    condition     = var.q_flash_iops >= 3000 && var.q_flash_iops <= 16000
+    error_message = "EBS gp3 IOPS must be in the range of 3000 to 16000."
+  }
+}
 variable "q_floating_ips_per_node" {
   description = "Qumulo floating IP addresses per node"
   type        = number
@@ -209,7 +239,8 @@ variable "q_instance_type" {
       var.q_instance_type == "m5.24xlarge",
       var.q_instance_type == "c5n.4xlarge",
       var.q_instance_type == "c5n.9xlarge",
-      var.q_instance_type == "c5n.18xlarge"
+      var.q_instance_type == "c5n.18xlarge",
+      var.q_instance_type == "c5d.9xlarge"
     ])
     error_message = "Only m5 and c5n instance types are supported.  Must be >=m5.xlarge or >=c5n.4xlarge. m5.xlarge is only supported with dev_envrionment=true."
   }
@@ -246,6 +277,17 @@ variable "q_node_count" {
     error_message = "The q_node_count value is mandatory with the marketplace offers Custom-1TB-6PB and Specified-AMI-ID. It is also used to grow a cluster. Specify 4 to 20 nodes. 0 is the default and implies a marketplace config lookup."
   }
 }
+/*
+variable "q_nodes_per_az" {
+  description = "IGNORE: For Future Use - Qumulo nodes per AZ."
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.q_nodes_per_az == 0 || (var.q_nodes_per_az >= 1 && var.q_nodes_per_az <= 3)
+    error_message = "The q_nodes_per_az value is required when specifying multiple subnets (AZs). It is also used to grow a multi-AZ cluster. Specify 0 or 1-3. 0 is the default and implies a single AZ deployment."
+  }
+}
+*/
 variable "q_permissions_boundary" {
   description = "OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model."
   type        = string
@@ -333,55 +375,4 @@ variable "term_protection" {
   description = "Enable Termination Protection"
   type        = bool
   default     = true
-}
-
-variable "q_marketplace_map" {
-  description = "NOT AN INPUT VARIABLE. Qumulo marketplace selection mapped to disk config, node count, and short name"
-  type = map(object({
-    DiskConfig = string
-    NodeCount  = number
-    ShortName  = string
-  }))
-  default = {
-    "1TB-Usable-All-Flash" = {
-      DiskConfig = "600GiB-AF"
-      NodeCount  = 4
-      ShortName  = "1TB"
-    }
-    "12TB-Usable-Hybrid-st1" = {
-      DiskConfig = "5TB-Hybrid-st1"
-      NodeCount  = 4
-      ShortName  = "12TB"
-    }
-    "96TB-Usable-Hybrid-st1" = {
-      DiskConfig = "20TB-Hybrid-st1"
-      NodeCount  = 6
-      ShortName  = "96TB"
-    }
-    "103TB-Usable-All-Flash" = {
-      DiskConfig = "30TB-AF"
-      NodeCount  = 5
-      ShortName  = "103TB"
-    }
-    "270TB-Usable-Hybrid-st1" = {
-      DiskConfig = "55TiB-Hybrid-st1"
-      NodeCount  = "6"
-      ShortName  = "270TB"
-    }
-    "809TB-Usable-Hybrid-st1" = {
-      DiskConfig = "160TiB-Hybrid-st1"
-      NodeCount  = 6
-      ShortName  = "809TB"
-    }
-    "Custom-1TB-6PB" = {
-      DiskConfig = "CUSTOM-ERROR-NEED-TO-SELECT-DISK-CONFIG"
-      NodeCount  = 0
-      ShortName  = "Custom"
-    }
-    "Specified-AMI-ID" = {
-      DiskConfig = "SPECIFIED-AMI-ID-ERROR-NEED-TO-SELECT-DISK-CONFIG"
-      NodeCount  = 0
-      ShortName  = "Custom"
-    }
-  }
 }

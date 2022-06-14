@@ -112,6 +112,10 @@ variable "private_subnet_id" {
   description = "AWS private subnet identifier"
   type        = string
 }
+variable "require_imdsv2" {
+  description = "Force all Instance Metadata Service Requests to us v2 Tokens"
+  type        = bool
+}
 variable "s3_bucket_name" {
   description = "AWS S3 bucket name"
   type        = string

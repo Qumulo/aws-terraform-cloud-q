@@ -6,7 +6,7 @@ chkurl () {
     k="k"
   fi
 
-  if [ $(curl -sL$k -w "%{http_code}\\n" "$url" -o /dev/null --connect-timeout 3 --max-time 5) == "200" ]; then
+  if [ $(curl -sL$k -w "%{http_code}\\n" "$url" -o /dev/null  --connect-timeout 10 --retry 3 --retry-delay 5 --max-time 60) == "200" ]; then
     return 1
   else
     return 0

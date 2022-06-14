@@ -56,3 +56,7 @@ output "url" {
   description = "Link to node 1 in the cluster"
   value       = "https://${tostring(aws_instance.node[0].private_ip)}"
 }
+output "temp" {
+  description = "value"
+  value       = var.private_subnet_ids
+}

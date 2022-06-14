@@ -20,20 +20,22 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-resource "aws_route53_zone" "qumulo_hosted_zone" {
-  name = var.fqdn_name
+aws_region             = "us-west-2"
+deployment_unique_name = "test-sort"
+#disk_config = null
+disk_config           = "600GiB-AF"
+floating_ips_per_node = 3
+node_count            = 6
 
-  vpc {
-    vpc_id = var.aws_vpc_id
-  }
+#marketplace_type       = "1TB-Usable-All-Flash"
+#marketplace_type = "Custom-1TB-6PB"
+marketplace_type = "Specified-AMI-ID"
 
-  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
-}
+nodes_per_az = 2
 
-resource "aws_route53_record" "qumulo_fips" {
-  name    = var.record_name
-  records = toset(var.cluster_floating_ips)
-  ttl     = "1"
-  type    = "A"
-  zone_id = aws_route53_zone.qumulo_hosted_zone.zone_id
-}
+private_subnet_ids = ["subnet-01d76eb8ccdc3f156"]
+#private_subnet_ids = ["subnet-01d76eb8ccdc3f156", "subnet-0c8edd3974ebe65c2", "subnet-0e2e94f42d42f23fe", "subnet-0edfe9c88d90d51af"]
+#private_subnet_ids = ["subnet-01d76eb8ccdc3f156", "subnet-01d76eb8ccdc3f156", "subnet-0e2e94f42d42f23fe", "subnet-0edfe9c88d90d51af"]
+
+public_subnet_ids = []
+#public_subnet_ids = ["subnet-1234567890abcdefg"]

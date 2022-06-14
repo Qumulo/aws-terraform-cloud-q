@@ -20,20 +20,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-resource "aws_route53_zone" "qumulo_hosted_zone" {
-  name = var.fqdn_name
-
-  vpc {
-    vpc_id = var.aws_vpc_id
-  }
-
-  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
-}
-
-resource "aws_route53_record" "qumulo_fips" {
-  name    = var.record_name
-  records = toset(var.cluster_floating_ips)
-  ttl     = "1"
-  type    = "A"
-  zone_id = aws_route53_zone.qumulo_hosted_zone.zone_id
+variable "aws_region" {
+  description = "AWS region"
+  type        = string
+  nullable    = false
 }

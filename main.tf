@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-# **** Version 3.4 ****
+# **** Version 4.0 ****
 
 data "aws_caller_identity" "current" {}
 
@@ -41,6 +41,10 @@ locals {
   upgrade_s3_prefix   = "${var.s3_bucket_prefix}${local.deployment_unique_name}/upgrade/"
   scripts_path        = "${path.module}/modules/qprovisioner/scripts/"
   state_s3_prefix     = "${var.s3_bucket_prefix}${local.deployment_unique_name}"
+
+  #make lists for subnet IDs
+  private_subnet_ids = tolist(split(",", replace(var.private_subnet_id, "/\\s*/", "")))
+  public_subnet_ids  = var.public_subnet_id == null ? [] : tolist(split(",", replace(var.public_subnet_id, "/\\s*/", "")))
 }
 
 #Generates a 11 digit random alphanumeric for the deployment_unique_name.  Generated on first apply and never changes.
@@ -96,14 +100,29 @@ module "secrets" {
   sidecar_user_name      = var.q_sidecar_user_name
 }
 
+#This sub-module validates and error checks subnets and AZ variables, looks up AWS Marketplace configurations, and establishes the final configuration variables for the cluster.
+module "qconfig" {
+  source = "./modules/qconfig"
+
+  aws_region             = var.aws_region
+  deployment_unique_name = local.deployment_unique_name
+  disk_config            = var.q_disk_config
+  floating_ips_per_node  = var.q_floating_ips_per_node
+  marketplace_type       = var.q_marketplace_type
+  node_count             = var.q_node_count
+  nodes_per_az           = 0 #Do not change this
+  private_subnet_ids     = local.private_subnet_ids
+  public_subnet_ids      = local.public_subnet_ids
+}
+
 #This sub-module looks up the AMI ID based on the marketplace type and the deployment region.
 module "qami-id-lookup" {
   count = var.q_marketplace_type == "Specified-AMI-ID" ? 0 : 1
 
-  source = "./modules/qami-id-lookup-4.2.0"
+  source = "./modules/qami-id-lookup-5.1.0.1"
 
   aws_region             = var.aws_region
-  marketplace_short_name = lookup(var.q_marketplace_map[var.q_marketplace_type], "ShortName")
+  marketplace_short_name = module.qconfig.marketplace_short_name
 }
 
 #This sub-module builds the Qumulo Cluster consisting of EC2 instances and EBS volumes.
@@ -113,20 +132,25 @@ module "qcluster" {
 
   ami_id                  = var.q_marketplace_type == "Specified-AMI-ID" ? var.q_ami_id : module.qami-id-lookup[0].ami_id
   aws_account_id          = data.aws_caller_identity.current.account_id
+  aws_number_azs          = module.qconfig.number_azs
   aws_partition           = data.aws_partition.current.partition
   aws_region              = var.aws_region
   aws_vpc_id              = var.aws_vpc_id
   cluster_name            = var.q_cluster_name
   deployment_unique_name  = local.deployment_unique_name
-  disk_config             = var.q_marketplace_type == "Custom-1TB-6PB" ? var.q_disk_config : lookup(var.q_marketplace_map[var.q_marketplace_type], "DiskConfig")
+  disk_config             = module.qconfig.disk_config
   ec2_key_pair            = var.ec2_key_pair
-  floating_ips_per_node   = var.q_floating_ips_per_node
+  flash_type              = var.q_flash_type
+  flash_tput              = var.q_flash_tput
+  flash_iops              = var.q_flash_iops
+  floating_ips_per_node   = module.qconfig.floating_ips_per_node
   instance_recovery_topic = var.q_instance_recovery_topic
   instance_type           = (var.q_instance_type == "m5.xlarge" && var.dev_environment) || var.q_instance_type != "m5.xlarge" ? var.q_instance_type : "m5.2xlarge"
   kms_key_id              = var.kms_key_id
-  node_count              = var.q_marketplace_type == "Specified-AMI-ID" || var.q_marketplace_type == "Custom-1TB-6PB" || var.q_node_count != 0 ? var.q_node_count : lookup(var.q_marketplace_map[var.q_marketplace_type], "NodeCount")
+  node_count              = module.qconfig.node_count
   permissions_boundary    = var.q_permissions_boundary
-  private_subnet_id       = var.private_subnet_id
+  private_subnet_ids      = module.qconfig.private_subnet_id_per_node
+  require_imdsv2          = true #Supported with 5.1.0.1 AMIs and later
   cluster_sg_cidrs        = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", replace(var.q_cluster_additional_sg_cidrs, "/\\s*/", ""))))
   term_protection         = var.term_protection
 
@@ -143,14 +167,14 @@ module "qprovisioner" {
   source = "./modules/qprovisioner"
 
   aws_account_id             = data.aws_caller_identity.current.account_id
-  aws_number_azs             = 1
+  aws_number_azs             = module.qconfig.number_azs
   aws_partition              = data.aws_partition.current.partition
   aws_region                 = var.aws_region
   aws_vpc_id                 = var.aws_vpc_id
   cluster_floating_ips       = module.qcluster.floating_ips
   cluster_instance_ids       = module.qcluster.instance_ids
-  cluster_max_nodes_down     = 1
-  cluster_mod_overness       = false
+  cluster_max_nodes_down     = module.qconfig.max_nodes_down
+  cluster_mod_overness       = module.qconfig.mod_overness
   cluster_name               = var.q_cluster_name
   cluster_node1_ip           = module.qcluster.node1_ip
   cluster_primary_ips        = module.qcluster.primary_ips
@@ -164,7 +188,8 @@ module "qprovisioner" {
   instance_type              = "m5.large"
   kms_key_id                 = var.kms_key_id
   permissions_boundary       = var.q_permissions_boundary
-  private_subnet_id          = var.private_subnet_id
+  private_subnet_id          = module.qconfig.private_subnet_id_per_node[0]
+  require_imdsv2             = true
   s3_bucket_name             = var.s3_bucket_name
   s3_bucket_region           = var.s3_bucket_region
   scripts_path               = local.scripts_path
@@ -175,6 +200,7 @@ module "qprovisioner" {
   upgrade_s3_prefix          = local.upgrade_s3_prefix
 
   tags = var.tags
+
 }
 
 #This sub-module provisions the Qumulo Sidecar Lambda functions for EBS volume replacement and CloudWatch metrics.
@@ -188,7 +214,7 @@ module "qsidecar" {
   deployment_unique_name        = local.deployment_unique_name
   sidecar_ebs_replacement_topic = var.q_sidecar_ebs_replacement_topic
   sidecar_password              = var.q_cluster_admin_password
-  sidecar_private_subnet_id     = var.q_local_zone_or_outposts ? var.q_sidecar_private_subnet_id : var.private_subnet_id
+  sidecar_private_subnet_id     = var.q_local_zone_or_outposts ? var.q_sidecar_private_subnet_id : module.qconfig.private_subnet_id_per_node[0]
   sidecar_user_name             = var.q_sidecar_user_name
   sidecar_version               = var.q_sidecar_version
 
@@ -200,7 +226,7 @@ module "qsidecar" {
 #IPs listed in the main output.
 #Likewise this module may be skipped if the floating IPs are added to a different PHZ R53 instance for the VPC.
 module "route53-phz" {
-  count = var.q_route53_provision ? 1 : 0
+  count = var.q_route53_provision && !module.qconfig.multi_az ? 1 : 0
 
   source = "./modules/route53-phz"
 
@@ -218,7 +244,7 @@ module "route53-phz" {
 module "cloudwatch" {
   source = "./modules/cloudwatch"
 
-  all_flash              = element(split("-", var.q_marketplace_type == "Custom-1TB-6PB" ? var.q_disk_config : lookup(var.q_marketplace_map[var.q_marketplace_type], "DiskConfig")), 1)
+  all_flash              = module.qconfig.all_flash
   audit_logging          = var.q_audit_logging
   aws_region             = var.aws_region
   cluster_name           = var.q_cluster_name
@@ -236,9 +262,29 @@ resource "aws_ssm_parameter" "nlb-management" {
     aws_vpc_id                   = var.aws_vpc_id
     cluster_primary_ips          = module.qcluster.primary_ips
     public_replication_provision = var.q_public_replication_provision
-    public_subnet_id             = var.public_subnet_id
+    public_subnet_ids            = module.qconfig.public_subnet_ids
     random_alphanumeric          = random_string.alphanumeric.id
+    term_protection              = var.term_protection
     tags                         = var.tags
   })
 }
 
+#Stores variables in SSM parameter store for use by the standalone nlb-qumulo module.
+resource "aws_ssm_parameter" "nlb-qumulo" {
+  name = "/qumulo/${local.deployment_unique_name}/nlb-qumulo/vars"
+  type = "String"
+  value = jsonencode({
+    aws_vpc_id          = var.aws_vpc_id
+    cluster_primary_ips = module.qcluster.primary_ips
+    cross_zone          = false
+    dereg_delay         = 60
+    dereg_term          = false
+    preserve_ip         = true
+    private_subnet_ids  = module.qconfig.private_subnet_ids
+    proxy_proto_v2      = false
+    random_alphanumeric = random_string.alphanumeric.id
+    stickiness          = true
+    term_protection     = var.term_protection
+    tags                = var.tags
+  })
+}

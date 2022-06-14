@@ -78,65 +78,65 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.4"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
 
-    # ****************************** Required *************************************************************
-    # ***** Terraform Variables *****
-    # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
-    #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
-    deployment_name = "my-deployment-name"
+  # ****************************** Required *************************************************************
+  # ***** Terraform Variables *****
+  # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+  #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+  deployment_name = "my-deployment-name"
 
-    # ***** S3 Bucket Variables *****
-    # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
-    # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
-    # s3_bucket_region                  - Region the S3 bucket is hosted in
-    s3_bucket_name   = "my-bucket"
-    s3_bucket_prefix = "my-prefix/"
-    s3_bucket_region = "us-west-2"
+  # ***** S3 Bucket Variables *****
+  # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
+  # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
+  # s3_bucket_region                  - Region the S3 bucket is hosted in
+  s3_bucket_name   = "my-bucket"
+  s3_bucket_prefix = "my-prefix/"
+  s3_bucket_region = "us-west-2"
 
-    # ***** AWS Variables *****
-    # aws_region                        - Region for the deployment of the cluster
-    # aws_vpc_id                        - The VPC for the deployment within the provided region
-    # ec2_keypair                       - EC2 key pair within the region
-    # private_subnet_id                 - Private Subnet to deploy the cluster in
-    # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
-    aws_region        = "us-west-2"
-    aws_vpc_id        = "vpc-1234567890abcdefg"
-    ec2_key_pair      = "my-keypair"
-    private_subnet_id = "subnet-1234567890abcdefg"
-    term_protection   = true
+  # ***** AWS Variables *****
+  # aws_region                        - Region for the deployment of the cluster
+  # aws_vpc_id                        - The VPC for the deployment within the provided region
+  # ec2_keypair                       - EC2 key pair within the region
+  # private_subnet_id                 - Private Subnet to deploy the cluster in
+  # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
+  aws_region        = "us-west-2"
+  aws_vpc_id        = "vpc-1234567890abcdefg"
+  ec2_key_pair      = "my-keypair"
+  private_subnet_id = "subnet-1234567890abcdefg"
+  term_protection   = true
 
-    # ***** Qumulo Cluster Variables *****
-    # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
-    # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge
-    # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
-    #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
-    #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
-    #                                       Custom-1TB-6PB or Specified-AMI-ID
-    q_cluster_admin_password = "!MyPwd123"
-    q_instance_type          = "m5.2xlarge"
-    q_marketplace_type       = "1TB-Usable-All-Flash"
+  # ***** Qumulo Cluster Variables *****
+  # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
+  # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge
+  # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
+  #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
+  #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
+  #                                       Custom-1TB-6PB or Specified-AMI-ID
+  q_cluster_admin_password = "!MyPwd123"
+  q_instance_type          = "m5.2xlarge"
+  q_marketplace_type       = "1TB-Usable-All-Flash"
 
-    # ***** Qumulo Sidecar Variables *****
-    # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
-    q_sidecar_version = "4.2.0"
+  # ***** Qumulo Sidecar Variables *****
+  # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
+  q_sidecar_version = "5.1.0.1"
 
-    # ****************************** Marketplace Type Selection Dependencies ******************************
-    # ***** Qumulo Cluster Config Options *****
-    # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
-    #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
-    #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
-    #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
-    # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
-    q_disk_config = null
-    q_node_count  = 0
+  # ****************************** Marketplace Type Selection Dependencies ******************************
+  # ***** Qumulo Cluster Config Options *****
+  # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
+  #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
+  #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
+  #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
+  # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
+  q_disk_config = null
+  q_node_count  = 0
 
-    # ****************************** Optional **************************************************************
-    # ***** Environment and Tag Options *****
-    # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
-    #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
-    #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-    tags = null
+  # ****************************** Optional **************************************************************
+  # ***** Environment and Tag Options *****
+  # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
+  #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
+  #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
+  tags = null
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -148,112 +148,118 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-    source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v3.4"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
 
-    # ****************************** Required *************************************************************
-    # ***** Terraform Variables *****
-    # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
-    #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
-    deployment_name = "my-deployment-name"
+  # ****************************** Required *************************************************************
+  # ***** Terraform Variables *****
+  # deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+  #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
+  deployment_name = "my-deployment-name"
 
-    # ***** S3 Bucket Variables *****
-    # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
-    # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
-    # s3_bucket_region                  - Region the S3 bucket is hosted in
-    s3_bucket_name   = "my-bucket"
-    s3_bucket_prefix = "my-prefix/"
-    s3_bucket_region = "us-west-2"
+  # ***** S3 Bucket Variables *****
+  # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
+  # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
+  # s3_bucket_region                  - Region the S3 bucket is hosted in
+  s3_bucket_name   = "my-bucket"
+  s3_bucket_prefix = "my-prefix/"
+  s3_bucket_region = "us-west-2"
 
-    # ***** AWS Variables *****
-    # aws_region                        - Region for the deployment of the cluster
-    # aws_vpc_id                        - The VPC for the deployment within the provided region
-    # ec2_keypair                       - EC2 key pair within the region
-    # private_subnet_id                 - Private Subnet to deploy the cluster in
-    # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
-    aws_region        = "us-west-2"
-    aws_vpc_id        = "vpc-1234567890abcdefg"
-    ec2_key_pair      = "my-keypair"
-    private_subnet_id = "subnet-1234567890abcdefg"
-    term_protection   = true
+  # ***** AWS Variables *****
+  # aws_region                        - Region for the deployment of the cluster
+  # aws_vpc_id                        - The VPC for the deployment within the provided region
+  # ec2_keypair                       - EC2 key pair within the region
+  # private_subnet_id                 - Private Subnet to deploy the cluster in
+  # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
+  aws_region        = "us-west-2"
+  aws_vpc_id        = "vpc-1234567890abcdefg"
+  ec2_key_pair      = "my-keypair"
+  private_subnet_id = "subnet-1234567890abcdefg"
+  term_protection   = true
 
-    # ***** Qumulo Cluster Variables *****
-    # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
-    # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
-    # q_cluster_version                 - Software version for creation >= 4.2.0.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
-    # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
-    # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
-    #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
-    #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
-    #                                       Custom-1TB-6PB or Specified-AMI-ID
-    q_cluster_admin_password = "!MyPwd123"
-    q_cluster_name           = "Cloud-Q"
-    q_cluster_version        = "5.0.3"
-    q_instance_type          = "m5.2xlarge"
-    q_marketplace_type       = "1TB-Usable-All-Flash"
+  # ***** Qumulo Cluster Variables *****
+  # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
+  # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
+  # q_cluster_version                 - Software version for creation >= 4.2.0.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
+  # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
+  # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
+  #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
+  #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
+  #                                       Custom-1TB-6PB or Specified-AMI-ID
+  q_cluster_admin_password = "!MyPwd123"
+  q_cluster_name           = "Cloud-Q"
+  q_cluster_version        = "5.1.2"
+  q_instance_type          = "m5.2xlarge"
+  q_marketplace_type       = "1TB-Usable-All-Flash"
 
-    # ***** Qumulo Sidecar Variables *****
-    # q_local_zone_or_outposts          - true if deploying the cluster in a local zone or on Outposts.
-    # q_sidecar_private_subnet_id       - Subnet in the Parent Region for the Sidecar Lambdas if deploying in a local zone or on Outposts.  
-    # q_sidecar_provision               - true to deploy the Sidecar Lambdas.  
-    # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
-    q_local_zone_or_outposts    = false
-    q_sidecar_private_subnet_id = null
-    q_sidecar_provision         = true
-    q_sidecar_version           = "5.0.3"
+  # ***** Qumulo Sidecar Variables *****
+  # q_local_zone_or_outposts          - true if deploying the cluster in a local zone or on Outposts.
+  # q_sidecar_private_subnet_id       - Subnet in the Parent Region for the Sidecar Lambdas if deploying in a local zone or on Outposts.  
+  # q_sidecar_provision               - true to deploy the Sidecar Lambdas.  
+  # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version.
+  q_local_zone_or_outposts    = false
+  q_sidecar_private_subnet_id = null
+  q_sidecar_provision         = true
+  q_sidecar_version           = "5.1.2"
 
-    # ****************************** Marketplace Type Selection Dependencies ******************************
-    # ***** Qumulo Cluster Config Options *****
-    # q_ami_id                          - This ami-id is only used if 'q_marketplace_type' is set to 'Specified-AMI-ID' above
-    # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
-    #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
-    #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
-    #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
-    # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
-    q_ami_id      = null
-    q_disk_config = null
-    q_node_count  = 0
+  # ****************************** Marketplace Type Selection Dependencies ******************************
+  # ***** Qumulo Cluster Config Options *****
+  # q_ami_id                          - This ami-id is only used if 'q_marketplace_type' is set to 'Specified-AMI-ID' above
+  # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
+  #                                       600GiB-AF, 1TB-AF, 5TB-AF, 8TiB-AF, 13TiB-AF, 20TiB-AF, 30TB-AF, 35TiB-AF, 55TiB-AF
+  #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
+  #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
+  # q_flash_type                      - Specify gp2 or gp3.  Default is gp3.  
+  # q_flash_tput                      - Specify gp3 throughput in MB/s 125 to 1000. Default is 250.  Not applicable to gp2.
+  # q_flash_iops                      - Specify gp3 iops between 3000 to 16000.  Default is 3000.  Not applicable to gp2.
+  # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
+  q_ami_id      = null
+  q_disk_config = null
+  q_flash_type  = "gp3"
+  q_flash_tput  = 250
+  q_flash_iops  = 3000
+  q_node_count  = 0
 
-    # ****************************** Optional **************************************************************
-    # ***** Environment and Tag Options *****
-    # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
-    # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
-    #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
-    #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-    dev_environment = false
-    tags            = null
+  # ****************************** Optional **************************************************************
+  # ***** Environment and Tag Options *****
+  # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
+  # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
+  #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
+  #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
+  dev_environment = false
+  tags            = null
 
-    # ***** Qumulo Cluster Misc Options *****
-    # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default key will be used.
-    # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
-    # q_cluster_additional_sg_cidrs     - Comma delimited list of CIDRS to add too the Qumulo Cluster security group. 10.10.10.0/24, 10.11.30.0/24, etc
-    # q_floating_ips_per_node           - An integer value from 1 to 4 for IP failover protection and client distribution with DNS
-    # q_permissions_boundary            - Apply an IAM permission boundary policy to all created IAM roles. Policy Name not ARN.
-    kms_key_id                    = null
-    q_audit_logging               = false
-    q_cluster_additional_sg_cidrs = null
-    q_floating_ips_per_node       = 3
-    q_permissions_boundary        = null
+  # ***** Qumulo Cluster Misc Options *****
+  # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default key will be used.
+  # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
+  # q_cluster_additional_sg_cidrs     - Comma delimited list of CIDRS to add too the Qumulo Cluster security group. 10.10.10.0/24, 10.11.30.0/24, etc
+  # q_floating_ips_per_node           - An integer value from 1 to 4 for IP failover protection and client distribution with DNS. Set to 0 if deploying nlb-qumulo module.
+  # q_permissions_boundary            - Apply an IAM permission boundary policy to all created IAM roles. Policy Name not ARN.
+  kms_key_id                    = null
+  q_audit_logging               = false
+  q_cluster_additional_sg_cidrs = null
+  q_floating_ips_per_node       = 3
+  q_permissions_boundary        = null
 
-    # ***** SNS Options *****
-    # q_instance_recovery_topic         - Specify the SNS arn
-    # q_sidecar_ebs_replacement_topic   - Specify the SNS arn
-    q_instance_recovery_topic       = null
-    q_sidecar_ebs_replacement_topic = null
+  # ***** SNS Options *****
+  # q_instance_recovery_topic         - Specify the SNS arn
+  # q_sidecar_ebs_replacement_topic   - Specify the SNS arn
+  q_instance_recovery_topic       = null
+  q_sidecar_ebs_replacement_topic = null
 
-    # ***** OPTIONAL module 'rout53-phz' *****
-    # q_fqdn_name                       - Specify an FQDN like companyname.local, for example
-    # q_record_name                     - The Record Name prefix should be specified if you plan to mix other records in the PHZ
-    # q_route53_provision               - true/false to provision the R53 PHZ
-    q_fqdn_name         = "my-dns-name.local"
-    q_record_name       = "qumulo"
-    q_route53_provision = false
+  # ***** OPTIONAL module 'rout53-phz' *****
+  # q_fqdn_name                       - Specify an FQDN like companyname.local, for example
+  # q_record_name                     - The Record Name prefix should be specified if you plan to mix other records in the PHZ
+  # q_route53_provision               - true/false to provision the R53 PHZ
+  q_fqdn_name         = "my-dns-name.local"
+  q_record_name       = "qumulo"
+  q_route53_provision = false
 
-    # ***** OPTIONAL module 'nlb-management' *****
-    # ----- Init and apply 'nlb-management' after applying the root main.tf if you desire public management
-    # public_subnet_id                  - AWS public subnet ID
-    # q_public_replication_provision    - true/false to enable Qumulo replication port
-    public_subnet_id               = "subnet-1234567890abcdefg"
-    q_public_replication_provision = false
+  # ***** OPTIONAL module 'nlb-management' *****
+  # ----- Init and apply 'nlb-management' after applying the root main.tf if you desire public management
+  # public_subnet_id                  - AWS public subnet ID
+  # q_public_replication_provision    - true/false to enable Qumulo replication port
+  public_subnet_id               = "subnet-1234567890abcdefg"
+  q_public_replication_provision = false
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -285,7 +291,7 @@ This repo is self documenting via Terraform-Docs.
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.8 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 3.7 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | ~> 3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.1 |
@@ -309,12 +315,14 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"Cloud-Q"` | no |
 | <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"4.2.0"` | no |
 | <a name="input_q_disk_config"></a> [q\_disk\_config](#input\_q\_disk\_config) | OPTIONAL: Qumulo disk config | `string` | `null` | no |
+| <a name="input_q_flash_iops"></a> [q\_flash\_iops](#input\_q\_flash\_iops) | OPTIONAL: Specify the iops for gp3 | `number` | `3000` | no |
+| <a name="input_q_flash_tput"></a> [q\_flash\_tput](#input\_q\_flash\_tput) | OPTIONAL: Specify the throughput, in MB/s, for gp3 | `number` | `250` | no |
+| <a name="input_q_flash_type"></a> [q\_flash\_type](#input\_q\_flash\_type) | OPTIONAL: Specify the type of EBS flash | `string` | `"gp3"` | no |
 | <a name="input_q_floating_ips_per_node"></a> [q\_floating\_ips\_per\_node](#input\_q\_floating\_ips\_per\_node) | Qumulo floating IP addresses per node | `number` | `3` | no |
 | <a name="input_q_fqdn_name"></a> [q\_fqdn\_name](#input\_q\_fqdn\_name) | OPTIONAL: The Fully Qualified Domain Name (FQDN) for Route 53 Private Hosted Zone | `string` | `null` | no |
 | <a name="input_q_instance_recovery_topic"></a> [q\_instance\_recovery\_topic](#input\_q\_instance\_recovery\_topic) | OPTIONAL: AWS SNS topic for Qumulo instance recovery | `string` | `null` | no |
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo EC2 instance type | `string` | `"m5.2xlarge"` | no |
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
-| <a name="input_q_marketplace_map"></a> [q\_marketplace\_map](#input\_q\_marketplace\_map) | NOT AN INPUT VARIABLE. Qumulo marketplace selection mapped to disk config, node count, and short name | <pre>map(object({<br>    DiskConfig = string<br>    NodeCount  = number<br>    ShortName  = string<br>  }))</pre> | <pre>{<br>  "103TB-Usable-All-Flash": {<br>    "DiskConfig": "30TB-AF",<br>    "NodeCount": 5,<br>    "ShortName": "103TB"<br>  },<br>  "12TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "5TB-Hybrid-st1",<br>    "NodeCount": 4,<br>    "ShortName": "12TB"<br>  },<br>  "1TB-Usable-All-Flash": {<br>    "DiskConfig": "600GiB-AF",<br>    "NodeCount": 4,<br>    "ShortName": "1TB"<br>  },<br>  "270TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "55TiB-Hybrid-st1",<br>    "NodeCount": "6",<br>    "ShortName": "270TB"<br>  },<br>  "809TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "160TiB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "809TB"<br>  },<br>  "96TB-Usable-Hybrid-st1": {<br>    "DiskConfig": "20TB-Hybrid-st1",<br>    "NodeCount": 6,<br>    "ShortName": "96TB"<br>  },<br>  "Custom-1TB-6PB": {<br>    "DiskConfig": "CUSTOM-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  },<br>  "Specified-AMI-ID": {<br>    "DiskConfig": "SPECIFIED-AMI-ID-ERROR-NEED-TO-SELECT-DISK-CONFIG",<br>    "NodeCount": 0,<br>    "ShortName": "Custom"<br>  }<br>}</pre> | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
 | <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `0` | no |
 | <a name="input_q_permissions_boundary"></a> [q\_permissions\_boundary](#input\_q\_permissions\_boundary) | OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model. | `string` | `null` | no |

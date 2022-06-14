@@ -7,7 +7,7 @@
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is 
-# furnished to do so, subject to the following conditions:
+# furnished to do so, subject to the following conditions =
 
 #The above copyright notice and this permission notice shall be included in all 
 #copies or substantial portions of the Software.
@@ -20,20 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-resource "aws_route53_zone" "qumulo_hosted_zone" {
-  name = var.fqdn_name
+# ** Required **
+#---------------
+aws_region = "us-west-2"
 
-  vpc {
-    vpc_id = var.aws_vpc_id
-  }
-
-  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
-}
-
-resource "aws_route53_record" "qumulo_fips" {
-  name    = var.record_name
-  records = toset(var.cluster_floating_ips)
-  ttl     = "1"
-  type    = "A"
-  zone_id = aws_route53_zone.qumulo_hosted_zone.zone_id
-}
