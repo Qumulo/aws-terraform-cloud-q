@@ -103,6 +103,15 @@ variable "q_cluster_additional_sg_cidrs" {
     error_message = "The q_cluster_additional_sg_cidrs must be a valid comma delimited string of CIDRS of the form '10.0.1.0/24, 10.10.3.0/24, 172.16.30.0/24'."
   }
 }
+variable "q_additional_sg_ids" {
+  description = "OPTIONAL: AWS additional security groups Ids for the Qumulo cluster"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.q_additional_sg_ids == null || can(regex("^sg-", var.q_additional_sg_ids))
+    error_message = "The q_additional_sg_ids must contain a valid Security group ID of the form 'sg-'."
+  }
+}
 variable "q_cluster_name" {
   description = "Qumulo cluster name"
   type        = string

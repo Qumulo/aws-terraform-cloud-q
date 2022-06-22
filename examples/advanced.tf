@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.1"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -83,11 +83,13 @@ module "qumulo_cloud_q" {
   # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default key will be used.
   # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
   # q_cluster_additional_sg_cidrs     - Comma delimited list of CIDRS to add too the Qumulo Cluster security group. 10.10.10.0/24, 10.11.30.0/24, etc
+  # q_additional_sg_ids               - Comma delimited list of optional security group Ids to add to the Qumulo Cluster. sg-0123456789abcdefg, sg-abcdefg0123456789, etc
   # q_floating_ips_per_node           - An integer value from 1 to 4 for IP failover protection and client distribution with DNS. Set to 0 if deploying nlb-qumulo module.
   # q_permissions_boundary            - Apply an IAM permission boundary policy to all created IAM roles. Policy Name not ARN.
   kms_key_id                    = null
   q_audit_logging               = false
   q_cluster_additional_sg_cidrs = null
+  q_additional_sg_ids           = null
   q_floating_ips_per_node       = 3
   q_permissions_boundary        = null
 
@@ -110,7 +112,7 @@ module "qumulo_cloud_q" {
   # public_subnet_id                  - AWS public subnet ID
   # q_public_replication_provision    - true/false to enable Qumulo replication port
   public_subnet_id               = "subnet-1234567890abcdefg"
-  q_public_replication_provision = false  
+  q_public_replication_provision = false
 }
 
 output "outputs_qumulo_cloud_q" {

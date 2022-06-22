@@ -282,7 +282,7 @@ resource "aws_network_interface" "node" {
   count = var.node_count
 
   private_ips_count = var.floating_ips_per_node
-  security_groups   = [aws_security_group.cluster.id]
+  security_groups   = var.cluster_additional_sg_ids == [] ? [aws_security_group.cluster.id] : concat([aws_security_group.cluster.id], var.cluster_additional_sg_ids)
   subnet_id         = var.private_subnet_ids[count.index]
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}-node ${count.index + 1}" })
@@ -308,8 +308,9 @@ resource "aws_instance" "node" {
   }
 
   root_block_device {
-    encrypted  = true
-    kms_key_id = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
+    encrypted   = true
+    kms_key_id  = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
+    volume_type = var.flash_type
 
     tags = merge(var.tags, { Name = "${var.deployment_unique_name}-boot" })
   }
@@ -336,7 +337,7 @@ resource "aws_instance" "node" {
   }
 
   lifecycle {
-    ignore_changes = [ami, user_data, root_block_device[0].kms_key_id, ebs_block_device, placement_group]
+    ignore_changes = [ami, user_data, root_block_device, ebs_block_device, placement_group]
   }
 }
 

@@ -62,15 +62,17 @@ content: |-
   | Deploy with a Custom AMI-ID || ✅ |
   | Customize Qumulo Admin Password | ✅ | ✅ |
   | Customize EC2 Instance Type | ✅ | ✅ |
-  | Customize EC2 Instance Count | ✅ | ✅ |
+  | Customize EC2 Instance Count | ✅ | ✅ | 
   | Customize Termination Protection | ✅ | ✅ |
+  | Customize EBS gp3 IOPS/Throughput || ✅ |  
   | Customize Qumulo Cluster Name || ✅ |
   | Customize Qumulo Software Version || ✅ |
   | Customize Qumulo Sidecar Deployment || ✅ |
   | Customize Qumulo # of Floating IPs || ✅ |
   | Optional: Add SNS Topics for EC2 & EBS Recovery || ✅ |
   | Optional: Add R53 PHZ DNS for Floating IPs || ✅ |
-  | Optional: Add CIDRS to Qumulo Seciruty Group || ✅ |
+  | Optional: Add CIDRS to Qumulo Security Group || ✅ |
+  | Optional: Add SG IDs to Qumulo Cluster || ✅ |
   | Optional: Add Qumulo Public Management || ✅ |
   | Optional: Add Qumulo Public Replication Port || ✅ |
   | Optional: Enable CloudWatch Audit Log Messages || ✅ |

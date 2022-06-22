@@ -58,13 +58,15 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 | Customize EC2 Instance Type | ✅ | ✅ |
 | Customize EC2 Instance Count | ✅ | ✅ |
 | Customize Termination Protection | ✅ | ✅ |
+| Customize EBS gp3 IOPS/Throughput || ✅ |
 | Customize Qumulo Cluster Name || ✅ |
 | Customize Qumulo Software Version || ✅ |
 | Customize Qumulo Sidecar Deployment || ✅ |
 | Customize Qumulo # of Floating IPs || ✅ |
 | Optional: Add SNS Topics for EC2 & EBS Recovery || ✅ |
 | Optional: Add R53 PHZ DNS for Floating IPs || ✅ |
-| Optional: Add CIDRS to Qumulo Seciruty Group || ✅ |
+| Optional: Add CIDRS to Qumulo Security Group || ✅ |
+| Optional: Add SG IDs to Qumulo Cluster || ✅ |
 | Optional: Add Qumulo Public Management || ✅ |
 | Optional: Add Qumulo Public Replication Port || ✅ |
 | Optional: Enable CloudWatch Audit Log Messages || ✅ |
@@ -78,7 +80,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.1"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -148,7 +150,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.0"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.1"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -232,11 +234,13 @@ module "qumulo_cloud_q" {
   # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default key will be used.
   # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
   # q_cluster_additional_sg_cidrs     - Comma delimited list of CIDRS to add too the Qumulo Cluster security group. 10.10.10.0/24, 10.11.30.0/24, etc
+  # q_additional_sg_ids               - Comma delimited list of optional security group Ids to add to the Qumulo Cluster. sg-0123456789abcdefg, sg-abcdefg0123456789, etc
   # q_floating_ips_per_node           - An integer value from 1 to 4 for IP failover protection and client distribution with DNS. Set to 0 if deploying nlb-qumulo module.
   # q_permissions_boundary            - Apply an IAM permission boundary policy to all created IAM roles. Policy Name not ARN.
   kms_key_id                    = null
   q_audit_logging               = false
   q_cluster_additional_sg_cidrs = null
+  q_additional_sg_ids           = null
   q_floating_ips_per_node       = 3
   q_permissions_boundary        = null
 
@@ -259,7 +263,7 @@ module "qumulo_cloud_q" {
   # public_subnet_id                  - AWS public subnet ID
   # q_public_replication_provision    - true/false to enable Qumulo replication port
   public_subnet_id               = "subnet-1234567890abcdefg"
-  q_public_replication_provision = false  
+  q_public_replication_provision = false
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -308,6 +312,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | OPTIONAL: AWS KMS encryption key identifier | `string` | `null` | no |
 | <a name="input_private_subnet_id"></a> [private\_subnet\_id](#input\_private\_subnet\_id) | AWS private subnet identifier | `string` | n/a | yes |
 | <a name="input_public_subnet_id"></a> [public\_subnet\_id](#input\_public\_subnet\_id) | OPTIONAL: Public Subnet ID for management NLB. | `string` | `null` | no |
+| <a name="input_q_additional_sg_ids"></a> [q\_additional\_sg\_ids](#input\_q\_additional\_sg\_ids) | OPTIONAL: AWS additional security groups Ids for the Qumulo cluster | `string` | `null` | no |
 | <a name="input_q_ami_id"></a> [q\_ami\_id](#input\_q\_ami\_id) | OPTIONAL: Qumulo AMI-ID | `string` | `null` | no |
 | <a name="input_q_audit_logging"></a> [q\_audit\_logging](#input\_q\_audit\_logging) | OPTIONAL: Configure a CloudWatch Log group to store Audit logs from Qumulo | `bool` | `false` | no |
 | <a name="input_q_cluster_additional_sg_cidrs"></a> [q\_cluster\_additional\_sg\_cidrs](#input\_q\_cluster\_additional\_sg\_cidrs) | OPTIONAL: AWS additional security group CIDRs for the Qumulo cluster | `string` | `null` | no |

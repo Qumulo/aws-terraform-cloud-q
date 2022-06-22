@@ -52,6 +52,10 @@ variable "cluster_sg_cidrs" {
   description = "AWS security group identifiers"
   type        = list(string)
 }
+variable "cluster_additional_sg_ids" {
+  description = "AWS additional security group Ids"
+  type        = list(string)
+}
 variable "deployment_unique_name" {
   description = "Unique Name for this Terraform deployment.  This is the deployment name plus 12 random hex digits that will be used for all resource names where appropriate."
   type        = string
