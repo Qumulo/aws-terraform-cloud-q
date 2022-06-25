@@ -92,6 +92,18 @@ variable "ec2_key_pair" {
   description = "AWS EC2 key pair"
   type        = string
 }
+variable "flash_type" {
+  description = "OPTIONAL: Specify the type of EBS flash"
+  type        = string
+}
+variable "flash_tput" {
+  description = "OPTIONAL: Specify the throughput, in MB/s, for gp3"
+  type        = number
+}
+variable "flash_iops" {
+  description = "OPTIONAL: Specify the iops for gp3"
+  type        = number
+}
 variable "functions_s3_prefix" {
   description = "AWS S3 prefix for provisioner functions"
   type        = string
@@ -126,6 +138,10 @@ variable "s3_bucket_region" {
 }
 variable "scripts_path" {
   description = "Local path for provisioner scripts"
+  type        = string
+}
+variable "scripts_s3_prefix" {
+  description = "AWS S3 prefix for provisioner scripts"
   type        = string
 }
 variable "sidecar_provision" {

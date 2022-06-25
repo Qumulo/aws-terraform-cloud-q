@@ -40,6 +40,7 @@ locals {
   upgrade_path        = "${path.module}/modules/qprovisioner/upgrade/"
   upgrade_s3_prefix   = "${var.s3_bucket_prefix}${local.deployment_unique_name}/upgrade/"
   scripts_path        = "${path.module}/modules/qprovisioner/scripts/"
+  scripts_s3_prefix   = "${var.s3_bucket_prefix}${local.deployment_unique_name}/scripts/"
   state_s3_prefix     = "${var.s3_bucket_prefix}${local.deployment_unique_name}"
 
   #make lists for subnet IDs
@@ -79,6 +80,15 @@ resource "aws_s3_bucket_object" "provisioner_functions" {
   key      = "${local.functions_s3_prefix}${each.value}"
   source   = "${local.functions_path}${each.value}"
   etag     = filemd5("${local.functions_path}${each.value}")
+}
+
+resource "aws_s3_bucket_object" "provisioner_script" {
+  provider = aws.bucket
+  for_each = fileset(local.scripts_path, "provision.sh")
+  bucket   = var.s3_bucket_name
+  key      = "${local.scripts_s3_prefix}${each.value}"
+  source   = "${local.scripts_path}${each.value}"
+  etag     = filemd5("${local.scripts_path}${each.value}")
 }
 
 resource "aws_s3_bucket_object" "provisioner_upgrades" {
@@ -136,13 +146,15 @@ module "qcluster" {
   aws_partition             = data.aws_partition.current.partition
   aws_region                = var.aws_region
   aws_vpc_id                = var.aws_vpc_id
+  cluster_additional_sg_ids = var.q_cluster_additional_sg_ids == null ? [] : tolist(split(",", replace(var.q_cluster_additional_sg_ids, "/\\s*/", "")))
   cluster_name              = var.q_cluster_name
+  cluster_sg_cidrs          = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", replace(var.q_cluster_additional_sg_cidrs, "/\\s*/", ""))))
   deployment_unique_name    = local.deployment_unique_name
   disk_config               = module.qconfig.disk_config
   ec2_key_pair              = var.ec2_key_pair
-  flash_type                = var.q_flash_type
-  flash_tput                = var.q_flash_tput
   flash_iops                = var.q_flash_iops
+  flash_tput                = var.q_flash_tput
+  flash_type                = var.q_flash_type
   floating_ips_per_node     = module.qconfig.floating_ips_per_node
   instance_recovery_topic   = var.q_instance_recovery_topic
   instance_type             = (var.q_instance_type == "m5.xlarge" && var.dev_environment) || var.q_instance_type != "m5.xlarge" ? var.q_instance_type : "m5.2xlarge"
@@ -151,10 +163,8 @@ module "qcluster" {
   permissions_boundary      = var.q_permissions_boundary
   private_subnet_ids        = module.qconfig.private_subnet_id_per_node
   require_imdsv2            = true #Supported with 5.1.0.1 AMIs and later
-  cluster_sg_cidrs          = var.q_cluster_additional_sg_cidrs == null ? [data.aws_vpc.selected.cidr_block] : concat([data.aws_vpc.selected.cidr_block], tolist(split(",", replace(var.q_cluster_additional_sg_cidrs, "/\\s*/", ""))))
-  cluster_additional_sg_ids = var.q_additional_sg_ids == null ? [] : tolist(split(",", replace(var.q_additional_sg_ids, "/\\s*/", "")))
-  term_protection           = var.term_protection
   tags                      = var.tags
+  term_protection           = var.term_protection
 }
 
 #This sub-module instantiates an EC2 instance for configuration of the Qumulo Cluster and is then shutdown.  
@@ -184,6 +194,9 @@ module "qprovisioner" {
   cluster_version            = var.q_cluster_version
   deployment_unique_name     = local.deployment_unique_name
   ec2_key_pair               = var.ec2_key_pair
+  flash_type                 = var.q_flash_type
+  flash_tput                 = var.q_flash_tput
+  flash_iops                 = var.q_flash_iops
   functions_s3_prefix        = local.functions_s3_prefix
   instance_type              = "m5.large"
   kms_key_id                 = var.kms_key_id
@@ -193,6 +206,7 @@ module "qprovisioner" {
   s3_bucket_name             = var.s3_bucket_name
   s3_bucket_region           = var.s3_bucket_region
   scripts_path               = local.scripts_path
+  scripts_s3_prefix          = local.scripts_s3_prefix
   sidecar_provision          = var.q_sidecar_provision
   sidecar_secrets_arn        = module.secrets.sidecar_secrets_arn
   software_secrets_arn       = module.secrets.software_secrets_arn

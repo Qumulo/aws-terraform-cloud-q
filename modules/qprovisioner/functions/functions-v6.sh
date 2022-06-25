@@ -185,7 +185,7 @@ modcmkpolicyTF () {
 }
 
 tagvols () {
-  local id_list_name=$1[@] region=$2 stack_name=$3 
+  local id_list_name=$1[@] region=$2 stack_name=$3 iops=$4 tput=$5
   local m id_list bootIDs=() gp2IDs=() gp3IDs=() st1IDs=() sc1IDs=()
 
   id_list=("${!id_list_name}")
@@ -201,6 +201,11 @@ tagvols () {
     gp3IDs=($(aws ec2 describe-volumes --region $region --filter "Name=attachment.instance-id, Values=${id_list[m]}" "Name=attachment.device, Values=/dev/x*" "Name=volume-type, Values=gp3" --query "Volumes[].VolumeId" --out "text"))
     if [ ${#gp3IDs[@]} -gt 0 ]; then
       aws ec2 create-tags --region $region --resources ${gp3IDs[@]} --tags "Key=Name,Value=$stack_name-gp3"
+      for n in "${!gp3IDs[@]}"; do
+        if [ ! $(aws ec2 modify-volume --region $region --volume-id ${gp3IDs[n]} --volume-type gp3 --iops $iops --throughput $tput | grep -q "error") ]; then
+	        echo "Can't change gp3 IOPS/Tput at this time."
+        fi        
+      done      
     fi   
 
     st1IDs=($(aws ec2 describe-volumes --region $region --filter "Name=attachment.instance-id, Values=${id_list[m]}" "Name=attachment.device, Values=/dev/x*" "Name=volume-type, Values=st1" --query "Volumes[].VolumeId" --out "text"))

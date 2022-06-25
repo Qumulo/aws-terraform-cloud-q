@@ -37,7 +37,7 @@ locals {
 
 resource "aws_secretsmanager_secret" "cluster" {
   description = "Qumulo Cluster user name and password for cluster administrative access"
-  name        = "${var.deployment_unique_name}-cluster-secrets"
+  name        = "/qumulo/${var.deployment_unique_name}-cluster-secrets"
 }
 
 resource "aws_secretsmanager_secret_version" "cluster" {
@@ -47,7 +47,7 @@ resource "aws_secretsmanager_secret_version" "cluster" {
 
 resource "aws_secretsmanager_secret" "sidecar" {
   description = "Sidecar Lambda function user name and password for Qumulo cluster access"
-  name        = "${var.deployment_unique_name}-sidecar-secrets"
+  name        = "/qumulo/${var.deployment_unique_name}-sidecar-secrets"
 }
 
 resource "aws_secretsmanager_secret_version" "sidecar" {
@@ -57,7 +57,7 @@ resource "aws_secretsmanager_secret_version" "sidecar" {
 
 resource "aws_secretsmanager_secret" "software" {
   description = "Qumulo password for software download access"
-  name        = "${var.deployment_unique_name}-software-secrets"
+  name        = "/qumulo/${var.deployment_unique_name}-software-secrets"
 }
 
 resource "aws_secretsmanager_secret_version" "software" {

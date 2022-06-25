@@ -158,6 +158,7 @@ resource "aws_iam_role_policy" "policy2" {
         "ec2:DescribeInstances",
         "ec2:DescribeVolumes",
         "ec2:ModifyInstanceAttribute",
+        "ec2:ModifyVolume",
         "kms:Decrypt",
         "lambda:GetFunction",
         "lambda:ListFunctions",
@@ -269,6 +270,8 @@ resource "aws_instance" "provisioner" {
     cluster_name           = var.cluster_name
     cluster_secrets_arn    = var.cluster_secrets_arn
     deployment_unique_name = var.deployment_unique_name
+    flash_tput             = var.flash_tput
+    flash_iops             = var.flash_iops
     floating_ips           = join(",", var.cluster_floating_ips)
     functions_s3_prefix    = var.functions_s3_prefix
     instance_ids           = join(",", var.cluster_instance_ids)
@@ -280,6 +283,7 @@ resource "aws_instance" "provisioner" {
     primary_ips            = join(",", var.cluster_primary_ips)
     region                 = var.aws_region
     scripts_path           = var.scripts_path
+    scripts_s3_prefix      = var.scripts_s3_prefix
     sidecar_provision      = var.sidecar_provision == true ? "YES" : "NO"
     sidecar_secrets_arn    = var.sidecar_secrets_arn
     software_secrets_arn   = var.software_secrets_arn
@@ -298,6 +302,7 @@ resource "aws_instance" "provisioner" {
   root_block_device {
     encrypted   = true
     kms_key_id  = var.kms_key_id == null ? "" : "arn:${var.aws_partition}:kms:${var.aws_region}:${var.aws_account_id}:key/${var.kms_key_id}"
+    volume_type = var.flash_type
     volume_size = 40
 
     tags = merge(var.tags, { Name = "${var.deployment_unique_name}-provisioner" })
