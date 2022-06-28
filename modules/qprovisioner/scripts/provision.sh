@@ -1,5 +1,6 @@
 cd /root
 region="${region}"
+s3_region="${bucket_region}"
 stkname="${deployment_unique_name}"
 sc_secrets_arn="${sidecar_secrets_arn}"
 cluster_secrets_arn="${cluster_secrets_arn}"
@@ -8,8 +9,8 @@ qqh="./qq --host ${node1_ip}"
 node_ips="${primary_ips}"
 instance_ids="${instance_ids}"
 float_ips="${floating_ips}"
-def_password=${temporary_password}
-cmk=${kms_key_id}
+def_password="${temporary_password}"
+cmk="${kms_key_id}"
 s3bkt="${bucket_name}"
 upgrade_s3pfx="${upgrade_s3_prefix}"
 functions_s3pfx="${functions_s3_prefix}"
@@ -28,7 +29,7 @@ f_tput="${flash_tput}"
 f_iops="${flash_iops}"     
 
 if [[ ! -e "functions-v6.sh" ]]; then
-  aws s3 cp s3://$bkt_pfx"functions-v6.sh" ./functions-v6.sh
+  aws s3 cp --region $s3_region s3://$bkt_pfx"functions-v6.sh" ./functions-v6.sh
 fi
 source functions-v6.sh
 
@@ -192,7 +193,7 @@ elif [ $in_quorum -gt 3 ]; then
 fi
 
 if [ -n "$new_ver" ]; then
-  aws s3 cp s3://$bkt_pfx"upgrade-order.txt" ./order.txt --quiet
+  aws s3 cp --region $s3_region s3://$bkt_pfx"upgrade-order.txt" ./order.txt --quiet
   IFS=", " read -r -a order <<< $(cat ./order.txt)
 
   for ((n=0; n<${#order[@]}+1; n++)); do
@@ -218,12 +219,12 @@ if [ -n "$new_ver" ]; then
     if [ -e "$sw_file" ]; then
       echo "$sw_file already downloaded"
     elif [ "$no_inet" == "true" ]; then
-      aws s3api head-object --region ${bucket_region} --bucket $s3bkt --key $upgrade_s3pfx$sw_file || no_file="true"
+      aws s3api head-object --region $s3_region --bucket $s3bkt --key $upgrade_s3pfx$sw_file || no_file="true"
       if [ "$no_file" == "true" ]; then
         ssmput "last-run-status" "$region" "$stkname" "Software upgrade required, no Internet or no object $f_path"
         exit
       else
-        aws s3 cp $f_path ./$sw_file --quiet
+        aws s3 cp --region $s3_region $f_path ./$sw_file --quiet
         ssmput "last-run-status" "$region" "$stkname" "Downloading $f_path"
       fi
     else
@@ -378,7 +379,7 @@ fi
 
 if [ "$cmk_prov" == "YES" ] && [ -n "$cmk" ]; then
   ssmput "last-run-status" "$region" "$stkname" "Applying CMK policy"
-  aws s3 cp s3://$bkt_pfx"cmk-policy-skeleton.json" ./add_policy.json
+  aws s3 cp --region $s3_region s3://$bkt_pfx"cmk-policy-skeleton.json" ./add_policy.json
   modcmkpolicyTF "$cmk" "$region" "$stkname-sidecar" "DiskRecoveryLambda"
   ssmput "cmk-policy-modified" "$region" "$stkname" "YES"
 fi

@@ -21,7 +21,7 @@ Content-Disposition: attachment; filename="userdata.txt"
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 #User data runs every boot cycle
 
-if [ $(curl -sI -w "%%{http_code}\\n" "s3.${region}.amazonaws.com" -o /dev/null --connect-timeout 10 --retry 10 --retry-delay 5 --max-time 200) == "405" ]; then
+if [ $(curl -sI -w "%%{http_code}\\n" "s3.${bucket_region}.amazonaws.com" -o /dev/null --connect-timeout 10 --retry 10 --retry-delay 5 --max-time 200) == "405" ]; then
   echo "S3 Reachable"
 else
   echo "S3 Unreachable"
@@ -30,7 +30,7 @@ fi
 
 cd /root
 if [[ ! -e "provision.sh" ]]; then
-  aws s3 cp s3://"${bucket_name}/${scripts_s3_prefix}provision.sh" ./provision.sh
+  aws s3 cp --region ${bucket_region} s3://"${bucket_name}/${scripts_s3_prefix}provision.sh" ./provision.sh
 fi
 
 sed "" provision.sh > provision-sub.sh
