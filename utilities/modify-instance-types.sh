@@ -1,4 +1,4 @@
- #!/bin/bash -xe
+#!/bin/bash -e
 
 # MIT License
 #
@@ -25,10 +25,14 @@
 #README********README*********README********************************************************
 #This script changes the EC2 instance type for a cluster.
 #This script depends on the cluster being deployed with the Qumulo Cloud Q Quick Start CloudFormation or aws-terraform-cloud-q Terraform scripts.
-#This script is designed to run on an AWS Linux AMI with the AWS CLI configured.
-#The AWS Linux EC2 instance must have connectivity to the cluster.
-#You may run this script on a machine remote to the VPC, but it must have connectivity to the VPC via VPN or Direct Connect and the AWS CLI must be configured.
-#The output of the nested stack QSTACK contains the stackname required here.
+#This script is designed to run on an AWS Linux 2 AMI with the AWS CLI configured OR the following IAM privileges configured on the EC2 instance:
+#	ssm:get-parameter
+#	ec2:describe-instances
+#	ec2:stop-instances
+#	ec2:modify-instance-attribute
+#	ec2:start-instances
+#The AWS Linux EC2 instance must have connectivity to the cluster on port 8000 and 443.
+#Stackname required here is the top-level stackname from CloudFormation or the deployment_unique_name from Terraform
 #The Cluster Instances must all be running or all be stopped.
 #The Cluster Instances must all have the same instance type.
 #At completion the cluster will be left in the original state, running or stopped.
@@ -302,7 +306,7 @@ if [ "$inService" = "yes" ] && [ $stopped = 0 ]; then
 
 		if [ "$inService" = "yes" ] && [ $stopped = 0 ]; then
 			echo "	--Stopping"
-			aws ec2 stop-instances --instance-ids "${instanceIDs[m]}" > /dev/null	
+			aws ec2 stop-instances --region "$region" --instance-ids "${instanceIDs[m]}" > /dev/null	
 
 	 		echo "	  ..Waiting for instance to stop"
 
@@ -316,7 +320,7 @@ if [ "$inService" = "yes" ] && [ $stopped = 0 ]; then
 		fi
 
 	  	echo "	--Changing instance type to $iNewType"
-		aws ec2 modify-instance-attribute --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
+		aws ec2 modify-instance-attribute --region "$region" --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
 
 		type=$(aws ec2 describe-instances --region "$region" --filter "Name=instance-id, Values=${instanceIDs[m]}" --query "Reservations[].Instances[].InstanceType" --out "text")
 		while [ "$type" != "$iNewType" ]; do
@@ -326,7 +330,7 @@ if [ "$inService" = "yes" ] && [ $stopped = 0 ]; then
 	  	echo "	--Instance type changed"
 
 		echo "	--Starting instance"
-		aws ec2 start-instances --instance-ids "${instanceIDs[m]}" > /dev/null
+		aws ec2 start-instances --region "$region" --instance-ids "${instanceIDs[m]}" > /dev/null
 
 	    echo "	  ..Waiting for instance to start"
 
@@ -363,7 +367,7 @@ if [ "$inService" = "no" ] && [ $stopped = 0 ]; then
 	for m in "${!instanceIDs[@]}"; do
 		(( n = m + 1 ))
 		echo "	--Stopping Node$n - Instance ID ${instanceIDs[m]}"		
-		aws ec2 stop-instances --instance-ids "${instanceIDs[m]}" > /dev/null	
+		aws ec2 stop-instances --region "$region" --instance-ids "${instanceIDs[m]}" > /dev/null	
 	done
 
     echo "	  ..Waiting for Node1 to stop"
@@ -385,7 +389,7 @@ if [ "$inService" = "no" ] && [ $stopped = 0 ]; then
 	
 	for m in "${!instanceIDs[@]}"; do
 		(( n = m + 1 ))		
-		aws ec2 modify-instance-attribute --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
+		aws ec2 modify-instance-attribute --region "$region" --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
 
 		type=$(aws ec2 describe-instances --region "$region" --filter "Name=instance-id, Values=${instanceIDs[m]}" --query "Reservations[].Instances[].InstanceType" --out "text")
 		while [ "$type" != "$iNewType" ]; do
@@ -401,7 +405,7 @@ if [ "$inService" = "no" ] && [ $stopped = 0 ]; then
 	for m in "${!instanceIDs[@]}"; do
 		(( n = m + 1 ))
 		echo "	--Starting Node$n - Instance ID ${instanceIDs[m]}"		
-		aws ec2 start-instances --instance-ids "${instanceIDs[m]}" > /dev/null	
+		aws ec2 start-instances --region "$region" --instance-ids "${instanceIDs[m]}" > /dev/null	
 	done
 
     echo "	  ..Waiting for Node1 to start"
@@ -440,7 +444,7 @@ if [ $stopped != 0 ]; then
 	
 	for m in "${!instanceIDs[@]}"; do
 		(( n = m + 1 ))		
-		aws ec2 modify-instance-attribute --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
+		aws ec2 modify-instance-attribute --region "$region" --instance-id "${instanceIDs[m]}" --instance-type "{\"Value\": \"$iNewType\"}" > /dev/null	
 
 		type=$(aws ec2 describe-instances --region "$region" --filter "Name=instance-id, Values=${instanceIDs[m]}" --query "Reservations[].Instances[].InstanceType" --out "text")
 		while [ "$type" != "$iNewType" ]; do

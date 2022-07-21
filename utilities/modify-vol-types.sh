@@ -1,4 +1,4 @@
- #!/bin/bash -xe
+#!/bin/bash -e
 
 # MIT License
 #
@@ -25,7 +25,11 @@
 #README********README*********README********************************************************
 #This script changes the EC2 EBS volume types
 #This script depends on the cluster being deployed with the Qumulo Cloud Q Quick Start CloudFormation or aws-terraform-cloud-q Terraform scripts.
-#This script is designed to run on a Mac/Linux machine with AWS CLI configured.
+#This script is designed to run on a Mac/Linux machine with the AWS CLI configured.  
+#If running it on an EC2 instance on AWS without the AWS CLI configured the following IAM permissions are required:
+#	ec2:describe-instances
+#	ec2:modify-volume
+#	ec2:create-tags
 #There are three scenarios:
 #1. Change from st1->sc1 or sc1->st1
 #2. Change from gp2->gp3 or gp3->gp2
@@ -180,6 +184,7 @@ else
 fi
 
 subTag=${vName%???}
+boot=${vName: -4}
 
 for m in "${!volIds[@]}"; do
 	if [ "$vNewType" = "gp3" ]; then
@@ -188,7 +193,7 @@ for m in "${!volIds[@]}"; do
 		aws ec2 modify-volume --region "$region" --volume-type "$vNewType" --volume-id "${volIds[m]}"
 	fi
 
-	if [ "$vUpdate" = "false" ]; then
+	if [ "$vUpdate" = "false" ] && [ "$boot" != "boot" ]; then
 		aws ec2 create-tags --region "$region" --resources "${volIds[m]}" --tags "Key=Name,Value=$subTag$vNewType"
 	fi
 done 
