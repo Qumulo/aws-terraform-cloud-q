@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.1"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.2"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -31,14 +31,14 @@ module "qumulo_cloud_q" {
   # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
   # q_cluster_name                    - Name must be an alpha-numeric string between 2 and 15 characters. Dash (-) is allowed if not the first or last character. Must be unique per cluster.
   # q_cluster_version                 - Software version for creation >= 5.1.0.1.  This variable MAY NOT BE USED to update the cluster software after creation.  Use the Qumulo UI instead.
-  # q_instance_type                   - >= 5m.2xlarge or >= c5n.4xlarge. To use m5.xlarge set the optional variable dev_environment=true
+  # q_instance_type                   - >= 5m.2xlarge >= m6i.2xlarge, or >= c5n.4xlarge. To use m5.xlarge or m6i.xlarge set the optional variable dev_environment=true
   # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
   #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
   #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
   #                                       Custom-1TB-6PB or Specified-AMI-ID
   q_cluster_admin_password = "!MyPwd123"
   q_cluster_name           = "Cloud-Q"
-  q_cluster_version        = "5.1.2"
+  q_cluster_version        = "5.1.5"
   q_instance_type          = "m5.2xlarge"
   q_marketplace_type       = "1TB-Usable-All-Flash"
 
@@ -50,7 +50,7 @@ module "qumulo_cloud_q" {
   q_local_zone_or_outposts    = false
   q_sidecar_private_subnet_id = null
   q_sidecar_provision         = true
-  q_sidecar_version           = "5.1.2"
+  q_sidecar_version           = "5.1.5"
 
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****

@@ -104,6 +104,7 @@ content: |-
   |[Qumulo SHIFT: Copy from Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-from-s3.md)| Copy data from S3 with the Qumulo GUI/CLI/API. |
   |[Qumulo SHIFT: Copy to Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-to-s3.md)| Copy data to S3 with the Qumulo GUI/CLI/API. |
   |[Terraform: Using the Custom CloudWatch Dashboard](./docs/tf-cloudwatch-dashboard.pdf)| Details on viewing the CloudWatch dashboard and resource groups that are created for the Qumulo cluster.|
+  |[Terraform: Using Qumulo EC2 & EBS type change scripts](./docs/tf-using-qumulo-ec2-ebs-change-scripts.pdf)| Details on how to change EC2 instance types and EBS volume types in production. |
   |[Terraform: Supported Updates](./docs/tf-update-deployment.pdf)| Details on Terraform update options and examples, including adding instances (nodes) to the cluster and upgrading the Qumulo Sidecar.|
   |[Terraform: Provisioning Instance Functions](./docs/tf-provisioning-instance-functions.pdf)| Details on the functions of the provisioner instance.|
   |[Terraform: Destroying the Cluster](./docs/tf-destroy-deployment.pdf)| Details on backing up data, termination protection, and on cleaning up an AWS KMS customer managed key policy. |

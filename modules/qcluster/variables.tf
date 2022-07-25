@@ -126,6 +126,7 @@ variable "disk_map" {
     slotCount : number
     workingSlots : number
     workingSize : number
+    workingIOPs : number
     backingSlots : number
     backingType : string
     backingSize : number
@@ -135,6 +136,7 @@ variable "disk_map" {
       slotCount    = 6
       workingSlots = 6
       workingSize  = 100
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -143,6 +145,7 @@ variable "disk_map" {
       slotCount    = 8
       workingSlots = 8
       workingSize  = 128
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -151,6 +154,7 @@ variable "disk_map" {
       slotCount    = 10
       workingSlots = 10
       workingSize  = 500
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -159,6 +163,7 @@ variable "disk_map" {
       slotCount    = 16
       workingSlots = 16
       workingSize  = 512
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -167,6 +172,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 25
       workingSize  = 533
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -175,6 +181,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 25
       workingSize  = 820
+      workingIOPs  = 3000
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -183,6 +190,7 @@ variable "disk_map" {
       slotCount    = 8
       workingSlots = 8
       workingSize  = 3750
+      workingIOPs  = 11250
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -191,6 +199,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 25
       workingSize  = 1434
+      workingIOPs  = 4302
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -199,6 +208,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 25
       workingSize  = 2253
+      workingIOPs  = 7659
       backingSlots = 0
       backingType  = "none"
       backingSize  = 0
@@ -207,6 +217,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 100
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "st1"
       backingSize  = 500
@@ -215,6 +226,7 @@ variable "disk_map" {
       slotCount    = 12
       workingSlots = 4
       workingSize  = 150
+      workingIOPs  = 3000
       backingSlots = 8
       backingType  = "st1"
       backingSize  = 1024
@@ -223,6 +235,7 @@ variable "disk_map" {
       slotCount    = 12
       workingSlots = 4
       workingSize  = 175
+      workingIOPs  = 3000
       backingSlots = 8
       backingType  = "st1"
       backingSize  = 1664
@@ -231,6 +244,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 160
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "st1"
       backingSize  = 2000
@@ -239,6 +253,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 350
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "st1"
       backingSize  = 3584
@@ -247,6 +262,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 550
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "st1"
       backingSize  = 5632
@@ -255,6 +271,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 900
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "st1"
       backingSize  = 9216
@@ -263,6 +280,7 @@ variable "disk_map" {
       slotCount    = 24
       workingSlots = 8
       workingSize  = 1000
+      workingIOPs  = 3000
       backingSlots = 16
       backingType  = "st1"
       backingSize  = 10240
@@ -271,6 +289,7 @@ variable "disk_map" {
       slotCount    = 24
       workingSlots = 8
       workingSize  = 1600
+      workingIOPs  = 4800
       backingSlots = 16
       backingType  = "st1"
       backingSize  = 16384
@@ -279,6 +298,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 5
       workingSize  = 2500
+      workingIOPs  = 7500
       backingSlots = 20
       backingType  = "st1"
       backingSize  = 16384
@@ -287,6 +307,7 @@ variable "disk_map" {
       slotCount    = 12
       workingSlots = 4
       workingSize  = 150
+      workingIOPs  = 3000
       backingSlots = 8
       backingType  = "sc1"
       backingSize  = 1024
@@ -295,6 +316,7 @@ variable "disk_map" {
       slotCount    = 12
       workingSlots = 4
       workingSize  = 175
+      workingIOPs  = 3000
       backingSlots = 8
       backingType  = "sc1"
       backingSize  = 1664
@@ -303,6 +325,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 160
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "sc1"
       backingSize  = 2000
@@ -311,6 +334,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 350
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "sc1"
       backingSize  = 3584
@@ -319,6 +343,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 550
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "sc1"
       backingSize  = 5632
@@ -327,6 +352,7 @@ variable "disk_map" {
       slotCount    = 15
       workingSlots = 5
       workingSize  = 900
+      workingIOPs  = 3000
       backingSlots = 10
       backingType  = "sc1"
       backingSize  = 9216
@@ -335,6 +361,7 @@ variable "disk_map" {
       slotCount    = 24
       workingSlots = 8
       workingSize  = 1000
+      workingIOPs  = 3000
       backingSlots = 16
       backingType  = "sc1"
       backingSize  = 10240
@@ -343,6 +370,7 @@ variable "disk_map" {
       slotCount    = 24
       workingSlots = 8
       workingSize  = 1600
+      workingIOPs  = 4800
       backingSlots = 16
       backingType  = "sc1"
       backingSize  = 16384
@@ -351,6 +379,7 @@ variable "disk_map" {
       slotCount    = 25
       workingSlots = 5
       workingSize  = 2500
+      workingIOPs  = 7500
       backingSlots = 20
       backingType  = "sc1"
       backingSize  = 16384
@@ -360,6 +389,7 @@ variable "disk_map" {
       workingSlots = 0
       workingType  = "null"
       workingSize  = 0
+      workingIOPs  = 0
       backingSlots = 0
       backingType  = "null"
       backingSize  = 0

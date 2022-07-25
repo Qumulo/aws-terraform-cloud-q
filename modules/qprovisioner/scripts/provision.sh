@@ -288,11 +288,11 @@ if [ "$new_cluster" == "true" ]; then
 
   ssmput "last-run-status" "$region" "$stkname" "Forming first quorum and configuring cluster"
 
-  if [ "$num_azs" == "1" ]; then
-    maxd=""
-  else
+  #if [ "$num_azs" == "1" ]; then
+  #  maxd=""
+  #else
     maxd="--max-node-failures $nodes_down"
-  fi
+  #fi
 
   $qqh cluster_create --cluster-name ${cluster_name} --admin-password $def_password --accept-eula --host-instance-id $def_password $maxd --node-ips $primary_list
 

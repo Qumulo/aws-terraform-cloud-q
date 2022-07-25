@@ -119,6 +119,7 @@ module "qconfig" {
   disk_config            = var.q_disk_config
   floating_ips_per_node  = var.q_floating_ips_per_node
   marketplace_type       = var.q_marketplace_type
+  max_nodes_down         = 1 #Do not change this
   node_count             = var.q_node_count
   nodes_per_az           = 0 #Do not change this
   private_subnet_ids     = local.private_subnet_ids
@@ -157,7 +158,7 @@ module "qcluster" {
   flash_type                = var.q_flash_type
   floating_ips_per_node     = module.qconfig.floating_ips_per_node
   instance_recovery_topic   = var.q_instance_recovery_topic
-  instance_type             = (var.q_instance_type == "m5.xlarge" && var.dev_environment) || var.q_instance_type != "m5.xlarge" ? var.q_instance_type : "m5.2xlarge"
+  instance_type             = ((var.q_instance_type == "m5.xlarge" || var.q_instance_type == "m6i.xlarge") && !var.dev_environment) ? replace(var.q_instance_type, "/\\..*/", ".2xlarge") : var.q_instance_type
   kms_key_id                = var.kms_key_id
   node_count                = module.qconfig.node_count
   permissions_boundary      = var.q_permissions_boundary
@@ -195,8 +196,8 @@ module "qprovisioner" {
   deployment_unique_name     = local.deployment_unique_name
   ec2_key_pair               = var.ec2_key_pair
   flash_type                 = var.q_flash_type
-  flash_tput                 = var.q_flash_tput
-  flash_iops                 = var.q_flash_iops
+  flash_tput                 = module.qcluster.flash_tput
+  flash_iops                 = module.qcluster.flash_iops
   functions_s3_prefix        = local.functions_s3_prefix
   instance_type              = "m5.large"
   kms_key_id                 = var.kms_key_id

@@ -40,6 +40,10 @@ variable "marketplace_type" {
   description = "Qumulo AWS marketplace type"
   type        = string
 }
+variable "max_nodes_down" {
+  description = "Maximum number of nodes that may be offline with full cluster functionality"
+  type        = number
+}
 variable "node_count" {
   description = "Qumulo cluster node count"
   type        = number

@@ -53,13 +53,17 @@ locals {
     "/dev/xvdz",
   ]
 
+  flash_tput             = var.flash_tput > 250 ? var.flash_tput : 250
+  disk_config_flash_iops = lookup(var.disk_map[var.disk_config], "workingIOPs")
+  flash_iops             = var.flash_iops > local.disk_config_flash_iops ? var.flash_iops : local.disk_config_flash_iops
+
   working_ebs_block_devices = [
     for i in range(lookup(var.disk_map[var.disk_config], "workingSlots")) : {
       device_name = local.device_names[i]
       volume_type = var.flash_type
       volume_size = lookup(var.disk_map[var.disk_config], "workingSize")
-      volume_tput = var.flash_type == "gp2" ? null : var.flash_tput
-      volume_iops = var.flash_type == "gp2" ? null : var.flash_iops
+      volume_tput = var.flash_type == "gp2" ? null : local.flash_tput
+      volume_iops = var.flash_type == "gp2" ? null : local.flash_iops
     }
   ]
 

@@ -62,13 +62,14 @@ locals {
   all_flash              = local.disk_config == null ? "" : element(split("-", local.disk_config), 1)
 
   #Modify overness if growing from 1 to 2 nodes per AZ.  All other node per AZ changes are invalid.
-  #current_max_nodes_down = tonumber("1")
   current_max_nodes_down = nonsensitive(data.aws_ssm_parameter.max-nodes-down.value) == "null" ? 0 : tonumber(nonsensitive(data.aws_ssm_parameter.max-nodes-down.value))
   mod_overness_no        = local.current_max_nodes_down == 0 || local.current_max_nodes_down == var.nodes_per_az
   mod_overness           = local.current_max_nodes_down == 1 && var.nodes_per_az == 2
-  valid_mod_overness     = local.saz || local.mod_overness || local.mod_overness_no
-  max_nodes_down         = local.saz ? 1 : var.nodes_per_az
-  floating_ips_per_node  = local.saz ? var.floating_ips_per_node : 0
+
+  #Validate max_nodes_down
+  valid_max_nodes_down  = var.max_nodes_down == 1 && local.node_count > 3 || var.max_nodes_down == 2 && local.node_count > 7 || var.max_nodes_down == 3 && local.node_count > 10 || var.max_nodes_down == 4 && local.node_count > 23
+  max_nodes_down        = local.saz ? var.max_nodes_down : var.nodes_per_az
+  floating_ips_per_node = local.saz ? var.floating_ips_per_node : 0
 
   #swap the key to the AZ name and the map will sort based on the AZ name
   private_azs_map = {
@@ -154,8 +155,6 @@ resource "null_resource" "check_unique_azs" {
 resource "null_resource" "check_invalid_us_east_az_ids" {
   count = !local.invalid_us_east_az_ids ? 0 : "AWS us-east-1 AZ ID = use1-az3 does not support Qumulo required EC2 instance types."
 }
-/*
-resource "null_resource" "check_valid_mod_overness" {
-  count = local.valid_mod_overness ? 0 : "Can not change cluster layout from ${local.current_max_nodes_down} nodes per AZ to ${var.nodes_per_az} nodes per AZ.  Redeploy with the desired nodes per AZ."
+resource "null_resource" "check_max_nodes_down" {
+  count = local.valid_max_nodes_down ? 0 : "The number of nodes in the cluster isn't large enough to support the desired max_nodes_down.  Minimum cluster size -> max_nodes_down: 4->1, 8->2, 11->3, 24->4."
 }
-*/

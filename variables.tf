@@ -246,12 +246,20 @@ variable "q_instance_type" {
       var.q_instance_type == "m5.12xlarge",
       var.q_instance_type == "m5.16xlarge",
       var.q_instance_type == "m5.24xlarge",
+      var.q_instance_type == "m6i.xlarge",
+      var.q_instance_type == "m6i.2xlarge",
+      var.q_instance_type == "m6i.4xlarge",
+      var.q_instance_type == "m6i.8xlarge",
+      var.q_instance_type == "m6i.12xlarge",
+      var.q_instance_type == "m6i.16xlarge",
+      var.q_instance_type == "m6i.24xlarge",
+      var.q_instance_type == "m6i.32xlarge",
       var.q_instance_type == "c5n.4xlarge",
       var.q_instance_type == "c5n.9xlarge",
       var.q_instance_type == "c5n.18xlarge",
       var.q_instance_type == "c5d.9xlarge"
     ])
-    error_message = "Only m5 and c5n instance types are supported.  Must be >=m5.xlarge or >=c5n.4xlarge. m5.xlarge is only supported with dev_envrionment=true."
+    error_message = "Only m5, m6i, and c5n instance types are supported.  Must be >=m5.xlarge, >=m6i.xlarge, or >=c5n.4xlarge. m5.xlarge and m6i.xlarge are only supported with dev_envrionment=true."
   }
 }
 variable "q_local_zone_or_outposts" {

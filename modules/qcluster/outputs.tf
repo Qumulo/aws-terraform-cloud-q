@@ -20,6 +20,14 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
+output "flash_iops" {
+  description = "gp3 Flash IOPS"
+  value       = local.flash_iops
+}
+output "flash_tput" {
+  description = "gp3 Flash throughput"
+  value       = local.flash_tput
+}
 output "floating_ips" {
   description = "List of all floating IPs for the Qumulo cluster"
   value       = flatten(concat(aws_instance.node[*].secondary_private_ips))
