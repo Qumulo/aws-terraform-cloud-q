@@ -47,7 +47,7 @@ else
   no_inet="true"
 fi
 
-ssmput "last-run-status" "$region" "$stkname" "Installing jq, nginx and reading secrets"
+ssmput "last-run-status" "$region" "$stkname" "Installing jq, nginx, aws cliv2, python3.8 and reading secrets"
 
 if yum list installed "jq" >/dev/null 2>&1; then
   echo "jq exists"
@@ -62,14 +62,23 @@ else
 fi    
 
 if yum list installed "awscli" >/dev/null 2>&1; then
+  aws s3 cp --region $s3_region s3://$s3bkt/$upgrade_s3pfx"awscliv2.zip" ./awscliv2.zip      
+  #curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   yum remove -y awscli
-  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
   unzip -q awscliv2.zip
   ./aws/install
   ln -s /usr/local/aws-cli/v2/current/bin/aws /usr/local/sbin/aws   
   ln -s /usr/local/aws-cli/v2/current/bin/aws /usr/bin/aws                        
 else
   echo "aws cli v2 exists"
+fi
+
+if yum list installed "python38.x86_64" >/dev/null 2>&1; then
+  echo "python 3.8 exists"
+else
+  amazon-linux-extras install python3.8
+  rm -f /usr/bin/python3
+  ln -s python3.8 /usr/bin/python3  
 fi
 
 if yum list installed "nginx.x86_64" >/dev/null 2>&1; then
