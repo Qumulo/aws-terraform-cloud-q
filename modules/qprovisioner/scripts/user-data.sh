@@ -59,7 +59,7 @@ sed -i.rep "s|\$${temporary_password}|${temporary_password}|g" provision-sub.sh
 sed -i.rep "s|\$${upgrade_s3_prefix}|${upgrade_s3_prefix}|g" provision-sub.sh
 sed -i.rep "s|\$${version}|${version}|g" provision-sub.sh
   
-
-/bin/bash -xe provision-sub.sh
+chmod 700 provision-sub.sh
+./provision-sub.sh
 
 poweroff

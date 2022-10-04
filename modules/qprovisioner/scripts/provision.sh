@@ -1,3 +1,4 @@
+#!/bin/bash -xe
 cd /root
 region="${region}"
 s3_region="${bucket_region}"
