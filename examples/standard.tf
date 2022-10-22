@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.2"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.4"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -29,7 +29,7 @@ module "qumulo_cloud_q" {
 
   # ***** Qumulo Cluster Variables *****
   # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
-  # q_instance_type                   - >= 5m.2xlarge >= m6i.2xlarge, or >= c5n.4xlarge.
+  # q_instance_type                   - >= m5.2xlarge >= m6i.2xlarge, or >= c5n.4xlarge.
   # q_marketplace_type                - The type of AWS Marketplace offer accepted.  Values are:
   #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
   #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
