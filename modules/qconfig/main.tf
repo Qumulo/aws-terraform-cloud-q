@@ -63,8 +63,8 @@ locals {
 
   #Modify overness if growing from 1 to 2 nodes per AZ.  All other node per AZ changes are invalid.
   current_max_nodes_down = nonsensitive(data.aws_ssm_parameter.max-nodes-down.value) == "null" ? 0 : tonumber(nonsensitive(data.aws_ssm_parameter.max-nodes-down.value))
-  mod_overness_no        = local.current_max_nodes_down == 0 || local.current_max_nodes_down == var.nodes_per_az
-  mod_overness           = local.current_max_nodes_down == 1 && var.nodes_per_az == 2
+  mod_overness           = local.maz && local.current_max_nodes_down == 1 && var.nodes_per_az == 2
+  valid_maz_add          = local.saz || local.current_max_nodes_down == 0 || local.mod_overness || local.current_max_nodes_down == var.nodes_per_az
 
   #Validate max_nodes_down
   valid_max_nodes_down  = var.max_nodes_down == 1 && local.node_count > 3 || var.max_nodes_down == 2 && local.node_count > 7 || var.max_nodes_down == 3 && local.node_count > 10 || var.max_nodes_down == 4 && local.node_count > 23
@@ -111,6 +111,9 @@ locals {
   ]
   unique_azs     = length(local.private_azs) == local.number_azs
   unique_pub_azs = length(local.public_azs) == local.number_pub_azs
+
+  #Use an invalid function to test the error condition.  A null resource with count can't be used because of the dependency on the previous deployment value from parameter store.
+  invalid_maz_add = local.valid_maz_add ? "" : SEE_ERROR_MESSAGE(true ? null : "ERROR: A multi-AZ deployment may only grow from 1 to 2 nodes per AZ.  For a 3 nodes per AZ a new cluster must be deployed.")
 }
 
 #Create parameter stores for syncing state between the config module and the provisioner instance

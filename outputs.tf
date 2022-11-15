@@ -26,7 +26,7 @@ output "deployment_unique_name" {
 }
 output "qumulo_cluster_provisioned" {
   description = "If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure"
-  value       = module.qprovisioner.status
+  value       = module.qconfig.mod_overness ? "${module.qprovisioner.status} ******REQUIRED: manually increase protection for 2 node failure******" : module.qprovisioner.status
 }
 output "qumulo_floating_ips" {
   description = "Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records."

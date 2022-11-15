@@ -28,6 +28,7 @@ For help planning the deployment see the table of documents below.
 |[Terraform: Deploying using an AWS Custom IAM role](./docs/tf-deploying-with-custom-iam-role.pdf) | Details on deploying with Terraform using a custom IAM role.|
 |[Terraform: AWS resources & EBS Service Quota planning](./docs/tf-resources-ebs-quota-planning.pdf) | Details on service-quota planning for Amazon EBS, including EC2 instance types and EBS volume types.|
 |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
+|[Terraform: Qumulo distributed multi-AZ deployment on AWS](./docs/tf-qumulo-multi-az-deployment.pdf) | Details on deploying a distributed multi-AZ cluster on AWS.|
 
 ## Deploying with Terraform
 
@@ -54,6 +55,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 | Deploy in a Local Zone || ✅ |
 | Deploy on Outposts || ✅ |
 | Deploy with a Custom AMI-ID || ✅ |
+| Deploy a distributed multi-AZ cluster || ✅ |
 | Customize Qumulo Admin Password | ✅ | ✅ |
 | Customize EC2 Instance Type | ✅ | ✅ |
 | Customize EC2 Instance Count | ✅ | ✅ |
@@ -80,7 +82,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.4"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.5"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -150,7 +152,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.4"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.5"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -170,7 +172,8 @@ module "qumulo_cloud_q" {
   # aws_region                        - Region for the deployment of the cluster
   # aws_vpc_id                        - The VPC for the deployment within the provided region
   # ec2_keypair                       - EC2 key pair within the region
-  # private_subnet_id                 - Private Subnet to deploy the cluster in
+  # private_subnet_id                 - Private Subnet to deploy the cluster in, or a comma delimited list with four subnets if deploying a multi-AZ distributed cluster
+  #                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
   # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
   aws_region        = "us-west-2"
   aws_vpc_id        = "vpc-1234567890abcdefg"
@@ -189,7 +192,7 @@ module "qumulo_cloud_q" {
   #                                       Custom-1TB-6PB or Specified-AMI-ID
   q_cluster_admin_password = "!MyPwd123"
   q_cluster_name           = "Cloud-Q"
-  q_cluster_version        = "5.2.4"
+  q_cluster_version        = "5.2.5"
   q_instance_type          = "m5.2xlarge"
   q_marketplace_type       = "1TB-Usable-All-Flash"
 
@@ -201,7 +204,7 @@ module "qumulo_cloud_q" {
   q_local_zone_or_outposts    = false
   q_sidecar_private_subnet_id = null
   q_sidecar_provision         = true
-  q_sidecar_version           = "5.2.4"
+  q_sidecar_version           = "5.2.5"
 
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
@@ -213,13 +216,15 @@ module "qumulo_cloud_q" {
   # q_flash_type                      - Specify gp2 or gp3.  Default is gp3.  
   # q_flash_tput                      - Specify gp3 throughput in MB/s 125 to 1000. Default is 250.  Not applicable to gp2.
   # q_flash_iops                      - Specify gp3 iops between 3000 to 16000.  Default is 3000.  Not applicable to gp2.
-  # q_node_count                      - Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
-  q_ami_id      = null
-  q_disk_config = null
-  q_flash_type  = "gp3"
-  q_flash_tput  = 250
-  q_flash_iops  = 3000
-  q_node_count  = 0
+  # q_node_count                      - Single AZ only & ignored for multi-AZ.  Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
+  # q_nodes_per_az                    - Multi AZ only & ignored for single AZ.  Must be specified for distributed multi-AZ deployments with 1, 2, or 3.
+  q_ami_id       = null
+  q_disk_config  = null
+  q_flash_type   = "gp3"
+  q_flash_tput   = 250
+  q_flash_iops   = 3000
+  q_node_count   = 0
+  q_nodes_per_az = 0
 
   # ****************************** Optional **************************************************************
   # ***** Environment and Tag Options *****
@@ -330,7 +335,8 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo EC2 instance type | `string` | `"m5.2xlarge"` | no |
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
-| <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Qumulo cluster node count | `number` | `0` | no |
+| <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Single AZ Qumulo cluster - node count | `number` | `0` | no |
+| <a name="input_q_nodes_per_az"></a> [q\_nodes\_per\_az](#input\_q\_nodes\_per\_az) | Multi-AZ Qumulo cluster - nodes per AZ. | `number` | `0` | no |
 | <a name="input_q_permissions_boundary"></a> [q\_permissions\_boundary](#input\_q\_permissions\_boundary) | OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model. | `string` | `null` | no |
 | <a name="input_q_public_replication_provision"></a> [q\_public\_replication\_provision](#input\_q\_public\_replication\_provision) | OPTIONAL: Enable port 3712 for replication from on-prem Qumulo systems using the public IP of the NLB for Qumulo Managment. Requires q\_public\_management\_provision=true above. | `bool` | `false` | no |
 | <a name="input_q_record_name"></a> [q\_record\_name](#input\_q\_record\_name) | OPTIONAL: The record name for the Route 53 Private Hosted Zone. This will add a prefix to the q\_fqdn\_name above | `string` | `null` | no |

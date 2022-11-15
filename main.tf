@@ -121,7 +121,7 @@ module "qconfig" {
   marketplace_type       = var.q_marketplace_type
   max_nodes_down         = 1 #Do not change this
   node_count             = var.q_node_count
-  nodes_per_az           = 0 #Do not change this
+  nodes_per_az           = var.q_nodes_per_az
   private_subnet_ids     = local.private_subnet_ids
   public_subnet_ids      = local.public_subnet_ids
 }

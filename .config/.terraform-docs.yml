@@ -34,6 +34,7 @@ content: |-
   |[Terraform: Deploying using an AWS Custom IAM role](./docs/tf-deploying-with-custom-iam-role.pdf) | Details on deploying with Terraform using a custom IAM role.|
   |[Terraform: AWS resources & EBS Service Quota planning](./docs/tf-resources-ebs-quota-planning.pdf) | Details on service-quota planning for Amazon EBS, including EC2 instance types and EBS volume types.|
   |[Terraform: Qumulo sizing & performance on AWS](./docs/tf-qumulo-sizing-performance.pdf) | Details on Qumulo cluster performance and scalability on AWS.|
+  |[Terraform: Qumulo distributed multi-AZ deployment on AWS](./docs/tf-qumulo-multi-az-deployment.pdf) | Details on deploying a distributed multi-AZ cluster on AWS.|  
   
   ## Deploying with Terraform
 
@@ -60,6 +61,7 @@ content: |-
   | Deploy in a Local Zone || ✅ |
   | Deploy on Outposts || ✅ |
   | Deploy with a Custom AMI-ID || ✅ |
+  | Deploy a distributed multi-AZ cluster || ✅ |
   | Customize Qumulo Admin Password | ✅ | ✅ |
   | Customize EC2 Instance Type | ✅ | ✅ |
   | Customize EC2 Instance Count | ✅ | ✅ | 

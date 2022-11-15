@@ -286,7 +286,7 @@ variable "q_marketplace_type" {
   }
 }
 variable "q_node_count" {
-  description = "Qumulo cluster node count"
+  description = "Single AZ Qumulo cluster - node count"
   type        = number
   default     = 0
   validation {
@@ -294,9 +294,8 @@ variable "q_node_count" {
     error_message = "The q_node_count value is mandatory with the marketplace offers Custom-1TB-6PB and Specified-AMI-ID. It is also used to grow a cluster. Specify 4 to 20 nodes. 0 is the default and implies a marketplace config lookup."
   }
 }
-/*
 variable "q_nodes_per_az" {
-  description = "IGNORE: For Future Use - Qumulo nodes per AZ."
+  description = "Multi-AZ Qumulo cluster - nodes per AZ."
   type        = number
   default     = 0
   validation {
@@ -304,7 +303,6 @@ variable "q_nodes_per_az" {
     error_message = "The q_nodes_per_az value is required when specifying multiple subnets (AZs). It is also used to grow a multi-AZ cluster. Specify 0 or 1-3. 0 is the default and implies a single AZ deployment."
   }
 }
-*/
 variable "q_permissions_boundary" {
   description = "OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model."
   type        = string
