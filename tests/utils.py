@@ -1,6 +1,7 @@
 from enum import Enum
 import os
 import stat
+import subprocess
 from tempfile import NamedTemporaryFile
 
 
@@ -52,7 +53,7 @@ def terraform_deploy(
     terraform_vars: dict[str, str],
     module_path: str,
     log_level: TerraformLogLevel,
-) -> None:
+) -> subprocess.CompletedProcess:
     """Deploy a terraform module given a specified module path."""
     script_file = NamedTemporaryFile()
     try:
@@ -71,6 +72,7 @@ def terraform_deploy(
         os.chmod(script_file.name, st.st_mode | stat.S_IEXEC)
 
         # Execute the terraform script
-        os.execvp('/bin/sh', ['/bin/sh', script_file.name])
+        return subprocess.run(['/bin/sh', script_file.name])
+
     finally:
         script_file.close()
