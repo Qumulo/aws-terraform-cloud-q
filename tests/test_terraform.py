@@ -14,6 +14,7 @@ class TestDeployVPC(unittest.TestCase):
             log_level=TerraformLogLevel.INFO,
         )
         try:
-            executor.deploy()
+            results = executor.deploy()
+            self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
         finally:
             executor.destroy()
