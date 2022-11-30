@@ -4,7 +4,7 @@ from textwrap import dedent
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from tests.utils import build_terraform_command, terraform_deploy, TerraformLogLevel
+from tests.utils import build_terraform_command, TerraformExecutor, TerraformLogLevel
 
 
 class TestBuildTerraformCommand(TestCase):
@@ -23,6 +23,7 @@ class TestBuildTerraformCommand(TestCase):
                 terraform_vars={},
                 module_path='/some/module/path',
                 log_level=TerraformLogLevel.INFO,
+                cmd='apply',
             ),
         )
 
@@ -41,6 +42,7 @@ class TestBuildTerraformCommand(TestCase):
                 terraform_vars={'hello': 'world'},
                 module_path='/some/module/path',
                 log_level=TerraformLogLevel.INFO,
+                cmd='apply',
             ),
         )
 
@@ -59,22 +61,24 @@ class TestBuildTerraformCommand(TestCase):
                 terraform_vars={'hello': 'world', 'wee': 'womp'},
                 module_path='/some/module/path',
                 log_level=TerraformLogLevel.INFO,
+                cmd='apply',
             ),
         )
 
 
 class TestTerraformDeploy(TestCase):
     @patch('tests.utils.os.chmod')
-    @patch('tests.utils.os.execvp')
-    def test_happy_path(self, mock_os_execvp: Mock, mock_os_chmod: Mock) -> None:
-        terraform_deploy(
+    @patch('tests.utils.subprocess')
+    def test_happy_path(self, mock_subprocess: Mock, mock_os_chmod: Mock) -> None:
+        executor = TerraformExecutor(
             terraform_workspace='test',
             terraform_vars_file='test.tfvars',
             terraform_vars={},
             module_path='/some/module/path',
             log_level=TerraformLogLevel.INFO,
         )
-        mock_os_execvp.assert_called_once()
+        executor.deploy()
+        mock_subprocess.run.assert_called_once()
         mock_os_chmod.assert_called_once()
 
         # Ensure the script written to disk is executable
