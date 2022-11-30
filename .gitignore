@@ -201,4 +201,4 @@ cython_debug/
 #.idea/
 
 # Terraform lock file
-.lock.hcl
+*.lock.hcl
