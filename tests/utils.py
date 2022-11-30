@@ -65,7 +65,7 @@ class TerraformExecutor(object):
         self.module_path = module_path
         self.log_level = log_level
 
-    def deploy(self) -> subprocess.CompletedProcess:
+    def _deploy_terraform(self, command: str) -> subprocess.CompletedProcess:
         """Deploy a terraform module given a specified module path."""
         script_file = NamedTemporaryFile()
         try:
@@ -77,7 +77,7 @@ class TerraformExecutor(object):
                         terraform_vars=self.terraform_vars,
                         module_path=self.module_path,
                         log_level=self.log_level,
-                        cmd='apply',
+                        cmd=command,
                     )
                 )
             # Make the script executable
@@ -88,27 +88,9 @@ class TerraformExecutor(object):
             return subprocess.run(['/bin/sh', script_file.name])
         finally:
             script_file.close()
+
+    def deploy(self) -> subprocess.CompletedProcess:
+        return self._deploy_terraform(command='apply')
 
     def destroy(self) -> subprocess.CompletedProcess:
-        """Destroy a terraform module given a specified module path."""
-        script_file = NamedTemporaryFile()
-        try:
-            with open(script_file.name, mode='w') as f:
-                f.write(
-                    build_terraform_command(
-                        terraform_workspace=self.terraform_workspace,
-                        terraform_vars_file=self.terraform_vars_file,
-                        terraform_vars=self.terraform_vars,
-                        module_path=self.module_path,
-                        log_level=self.log_level,
-                        cmd='apply -destroy',
-                    )
-                )
-            # Make the script executable
-            st = os.stat(script_file.name)
-            os.chmod(script_file.name, st.st_mode | stat.S_IEXEC)
-
-            # Execute the terraform script
-            return subprocess.run(['/bin/sh', script_file.name])
-        finally:
-            script_file.close()
+        return self._deploy_terraform(command='apply -destroy')

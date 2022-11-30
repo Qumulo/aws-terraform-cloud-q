@@ -15,6 +15,6 @@ class TestDeployVPC(unittest.TestCase):
         )
         try:
             results = executor.deploy()
-            self.assertEqual(0, results.returncode)
+            self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
         finally:
             executor.destroy()
