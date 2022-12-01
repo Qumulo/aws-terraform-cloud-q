@@ -118,7 +118,6 @@ class TerraformExecutor(object):
         return self._deploy_terraform(command='apply -destroy')
 
     def output(self) -> Dict[str, Any]:
-        print(f'Getting outputs from previous run for workspace {self.terraform_workspace}')
         env_copy = os.environ.copy()
         env_copy.update({'TF_WORKSPACE': self.terraform_workspace})
         process_output = (
