@@ -39,7 +39,6 @@ class TestDeployVPC(unittest.TestCase):
             results = executor.deploy()
             self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
             outputs = executor.output()
-            print(f'outputs are {outputs}')
             self.assertIsNotNone(outputs['vpc_id'])
             self.assertEqual(1, len(outputs['private_subnet_ids']))
             self.assertEqual(0, len(outputs['public_subnet_ids']))
