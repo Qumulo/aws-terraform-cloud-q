@@ -20,22 +20,35 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-aws_region             = "us-west-2"
-deployment_unique_name = "test-sort"
-#disk_config = null
-disk_config           = "600GiB-AF"
-floating_ips_per_node = 3
-node_count            = 6
-
-#marketplace_type       = "1TB-Usable-All-Flash"
-#marketplace_type = "Custom-1TB-6PB"
-marketplace_type = "Specified-AMI-ID"
-
-nodes_per_az = 2
-
-private_subnet_ids = ["subnet-01d76eb8ccdc3f156"]
-#private_subnet_ids = ["subnet-01d76eb8ccdc3f156", "subnet-0c8edd3974ebe65c2", "subnet-0e2e94f42d42f23fe", "subnet-0edfe9c88d90d51af"]
-#private_subnet_ids = ["subnet-01d76eb8ccdc3f156", "subnet-01d76eb8ccdc3f156", "subnet-0e2e94f42d42f23fe", "subnet-0edfe9c88d90d51af"]
-
-public_subnet_ids = []
-#public_subnet_ids = ["subnet-1234567890abcdefg"]
+variable "aws_vpc_id" {
+  description = "AWS VPC identifier"
+  type        = string
+}
+variable "cluster_primary_ips" {
+  description = "List of all primary IPs for the Qumulo cluster"
+  type        = list(string)
+}
+variable "deployment_unique_name" {
+  description = "Unique Name for this Terraform deployment.  This is the deployment name plus 12 random hex digits that will be used for all resource names where appropriate."
+  type        = string
+}
+variable "node_count" {
+  description = "Qumulo cluster node count"
+  type        = number
+}
+variable "public_replication_provision" {
+  description = "Enable port 3712 for Qumulo replication on the public NLB listener"
+  type        = bool
+}
+variable "public_subnet_ids" {
+  description = "AWS public subnet identifiers"
+  type        = list(string)
+}
+variable "random_alphanumeric" {
+  description = "Alphanumeric portion of deployment unique name"
+  type        = string
+}
+variable "tags" {
+  description = "Additional global tags"
+  type        = map(string)
+}

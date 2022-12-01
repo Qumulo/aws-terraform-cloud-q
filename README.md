@@ -69,6 +69,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 | Optional: Add R53 PHZ DNS for Floating IPs || ✅ |
 | Optional: Add CIDRS to Qumulo Security Group || ✅ |
 | Optional: Add SG IDs to Qumulo Cluster || ✅ |
+| Optional: Deploy with an NLB || ✅ |
 | Optional: Add Qumulo Public Management || ✅ |
 | Optional: Add Qumulo Public Replication Port || ✅ |
 | Optional: Enable CloudWatch Audit Log Messages || ✅ |
@@ -82,7 +83,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.5"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.6"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -152,7 +153,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.5"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.6"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -263,12 +264,27 @@ module "qumulo_cloud_q" {
   q_record_name       = "qumulo"
   q_route53_provision = false
 
+  # ***** OPTIONAL module 'nlb-qumulo' *****
+  # ----- Disables any R53 provisioning, disables floating IPs, used for multi-AZ deployments or single AZ deployments that require PrivateLink
+  # q_nlb_cross_zone                  - true/false to enable cross AZ load balancing.  Only relevant for multi-AZ deployments.
+  # q_nlb_override_subnet_id          - Default = null.  If q_nlb_provision = true, the NLB will be deployed in the same subnet(s) as the cluster.
+  #                                       To override enter a Private Subnet to deploy the NLB in, or a comma delimited list with four subnets if deploying a multi-AZ distributed cluster
+  #                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
+  # q_nlb_provision                   - true/false to enable deployment of the NLB.  If the qconfig module senses multi-AZ it will deploy the NLB in the same subnets as the cluster
+  # q_nlb_stickiness                  - true/false to enable sticky sessions
+  q_nlb_cross_zone         = false
+  q_nlb_override_subnet_id = null
+  q_nlb_provision          = false
+  q_nlb_stickiness         = true
+
   # ***** OPTIONAL module 'nlb-management' *****
-  # ----- Init and apply 'nlb-management' after applying the root main.tf if you desire public management
-  # public_subnet_id                  - AWS public subnet ID
+  # ----- Deploys an NLB in a public subnet for public management reachability.  Test environments only.  Not for production.
+  # public_subnet_id                  - AWS public subnet ID(s), one for single AZ, 4 or more for multi-AZ as a comma delimited string
+  # q_public_mgmt_provision           - true/false to enable deployment of the management NLB
   # q_public_replication_provision    - true/false to enable Qumulo replication port
-  public_subnet_id               = "subnet-1234567890abcdefg"
-  q_public_replication_provision = false
+  public_subnet_id               = null
+  q_public_mgmt_provision        = false
+  q_public_replication_provision = true
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -335,9 +351,14 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_instance_type"></a> [q\_instance\_type](#input\_q\_instance\_type) | Qumulo EC2 instance type | `string` | `"m5.2xlarge"` | no |
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
+| <a name="input_q_nlb_cross_zone"></a> [q\_nlb\_cross\_zone](#input\_q\_nlb\_cross\_zone) | OPTIONAL: AWS NLB Enable cross-AZ load balancing | `bool` | `false` | no |
+| <a name="input_q_nlb_override_subnet_id"></a> [q\_nlb\_override\_subnet\_id](#input\_q\_nlb\_override\_subnet\_id) | OPTIONAL: Private Subnet ID for NLB if deploying in subnet(s) other than subnet(s) the cluster is deployed in | `string` | `null` | no |
+| <a name="input_q_nlb_provision"></a> [q\_nlb\_provision](#input\_q\_nlb\_provision) | OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for load balancing and client failover | `bool` | `false` | no |
+| <a name="input_q_nlb_stickiness"></a> [q\_nlb\_stickiness](#input\_q\_nlb\_stickiness) | OPTIONAL: AWS NLB sticky sessions | `bool` | `true` | no |
 | <a name="input_q_node_count"></a> [q\_node\_count](#input\_q\_node\_count) | Single AZ Qumulo cluster - node count | `number` | `0` | no |
 | <a name="input_q_nodes_per_az"></a> [q\_nodes\_per\_az](#input\_q\_nodes\_per\_az) | Multi-AZ Qumulo cluster - nodes per AZ. | `number` | `0` | no |
 | <a name="input_q_permissions_boundary"></a> [q\_permissions\_boundary](#input\_q\_permissions\_boundary) | OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model. | `string` | `null` | no |
+| <a name="input_q_public_mgmt_provision"></a> [q\_public\_mgmt\_provision](#input\_q\_public\_mgmt\_provision) | OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for a public managment interface.  Not for production, test environments only. | `bool` | `false` | no |
 | <a name="input_q_public_replication_provision"></a> [q\_public\_replication\_provision](#input\_q\_public\_replication\_provision) | OPTIONAL: Enable port 3712 for replication from on-prem Qumulo systems using the public IP of the NLB for Qumulo Managment. Requires q\_public\_management\_provision=true above. | `bool` | `false` | no |
 | <a name="input_q_record_name"></a> [q\_record\_name](#input\_q\_record\_name) | OPTIONAL: The record name for the Route 53 Private Hosted Zone. This will add a prefix to the q\_fqdn\_name above | `string` | `null` | no |
 | <a name="input_q_route53_provision"></a> [q\_route53\_provision](#input\_q\_route53\_provision) | OPTIONAL: Configure Route 53 DNS for Floating IPs. | `bool` | `false` | no |
@@ -357,6 +378,7 @@ This repo is self documenting via Terraform-Docs.
 | Name | Description |
 |------|-------------|
 | <a name="output_deployment_unique_name"></a> [deployment\_unique\_name](#output\_deployment\_unique\_name) | The unique name for this deployment. |
+| <a name="output_outputs_qconfig_module"></a> [outputs\_qconfig\_module](#output\_outputs\_qconfig\_module) | n/a |
 | <a name="output_qumulo_cluster_provisioned"></a> [qumulo\_cluster\_provisioned](#output\_qumulo\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records. |
 | <a name="output_qumulo_knowledge_base"></a> [qumulo\_knowledge\_base](#output\_qumulo\_knowledge\_base) | Qumulo knowledge base |
@@ -364,6 +386,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="output_qumulo_private_SMB"></a> [qumulo\_private\_SMB](#output\_qumulo\_private\_SMB) | Private SMB UNC path for the Qumulo cluster |
 | <a name="output_qumulo_private_url"></a> [qumulo\_private\_url](#output\_qumulo\_private\_url) | Private URL for the Qumulo cluster |
 | <a name="output_qumulo_private_url_node1"></a> [qumulo\_private\_url\_node1](#output\_qumulo\_private\_url\_node1) | Link to private IP for Qumulo Cluster - Node 1 |
+| <a name="output_qumulo_public_url"></a> [qumulo\_public\_url](#output\_qumulo\_public\_url) | Link to public IP for Qumulo Cluster |
 
 ---
 

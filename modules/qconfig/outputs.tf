@@ -52,6 +52,10 @@ output "multi_az" {
   description = "Multi-AZ Deployment"
   value       = local.maz
 }
+output "nlb_subnet_ids" {
+  description = "Validated and sorted nlb subnets IDs"
+  value       = local.nlb_subnet_id_per_az
+}
 output "node_count" {
   description = "Qumulo cluster final node count"
   value       = local.node_count

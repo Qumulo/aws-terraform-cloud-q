@@ -20,58 +20,36 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-data "terraform_remote_state" "main" {
-  backend = "local"
-
-  config = {
-    path = terraform.workspace == "default" ? "../terraform.tfstate" : "../terraform.tfstate.d/${terraform.workspace}/terraform.tfstate"
-  }
-}
-
-data "aws_ssm_parameter" "nlb-management" {
-  name = "/qumulo/${local.deployment_unique_name}/nlb-management/vars"
-}
-
-locals {
-  deployment_unique_name       = data.terraform_remote_state.main.outputs.deployment_unique_name
-  aws_vpc_id                   = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["aws_vpc_id"]
-  cluster_primary_ips          = toset(jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["cluster_primary_ips"])
-  public_replication_provision = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_replication_provision"]
-  public_subnet_ids            = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["public_subnet_ids"]
-  random_alphanumeric          = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["random_alphanumeric"]
-  tags                         = jsondecode(nonsensitive(data.aws_ssm_parameter.nlb-management.value))["tags"]
-}
-
 resource "aws_lb" "mgmt_nlb" {
-  name               = "qumulo-pub-${local.random_alphanumeric}"
+  name               = "qumulo-pub-${var.random_alphanumeric}"
   internal           = false
   ip_address_type    = "ipv4"
   load_balancer_type = "network"
-  subnets            = local.public_subnet_ids
+  subnets            = var.public_subnet_ids
 
-  tags = merge(local.tags, { Name = "${local.deployment_unique_name}-Qumulo Public Management NLB" })
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}-Qumulo Public Management NLB" })
 }
 
 resource "aws_lb_target_group" "port_443" {
-  name        = "qumulo-pub-443-${local.random_alphanumeric}"
+  name        = "qumulo-pub-443-${var.random_alphanumeric}"
   port        = 443
   protocol    = "TCP"
   target_type = "ip"
-  vpc_id      = local.aws_vpc_id
+  vpc_id      = var.aws_vpc_id
 
   stickiness {
     enabled = true
     type    = "source_ip"
   }
 
-  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_lb_target_group_attachment" "port_443" {
+  count            = var.node_count
   port             = 443
   target_group_arn = aws_lb_target_group.port_443.arn
-  for_each         = local.cluster_primary_ips
-  target_id        = each.value
+  target_id        = var.cluster_primary_ips[count.index]
 }
 
 resource "aws_lb_listener" "port_443" {
@@ -85,31 +63,31 @@ resource "aws_lb_listener" "port_443" {
 }
 
 resource "aws_lb_target_group" "port_3712" {
-  count = local.public_replication_provision ? 1 : 0
+  count = var.public_replication_provision ? 1 : 0
 
-  name        = "qumulo-pub-3712-${local.random_alphanumeric}"
+  name        = "qumulo-pub-3712-${var.random_alphanumeric}"
   port        = 3712
   protocol    = "TCP"
   target_type = "ip"
-  vpc_id      = local.aws_vpc_id
+  vpc_id      = var.aws_vpc_id
 
   stickiness {
     enabled = true
     type    = "source_ip"
   }
 
-  tags = merge(local.tags, { Name = "${local.deployment_unique_name}" })
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
 resource "aws_lb_target_group_attachment" "port_3712" {
+  count            = var.public_replication_provision ? var.node_count : 0
   port             = 3712
   target_group_arn = aws_lb_target_group.port_3712[0].arn
-  for_each         = local.public_replication_provision ? local.cluster_primary_ips : []
-  target_id        = each.value
+  target_id        = var.cluster_primary_ips[count.index]
 }
 
 resource "aws_lb_listener" "port_3712" {
-  count = local.public_replication_provision ? 1 : 0
+  count = var.public_replication_provision ? 1 : 0
 
   load_balancer_arn = aws_lb.mgmt_nlb.arn
   port              = "3712"

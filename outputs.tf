@@ -44,19 +44,23 @@ output "qumulo_primary_ips" {
 */
 output "qumulo_private_NFS" {
   description = "Private NFS path for the Qumulo cluster"
-  value       = var.q_route53_provision ? module.route53-phz[0].nfs : "<custom.dns>:/<NFS Export Name>"
+  value       = var.q_route53_provision && !module.qconfig.multi_az && !var.q_nlb_provision ? module.route53-phz[0].nfs : (module.qconfig.multi_az || var.q_nlb_provision ? module.nlb-qumulo[0].nlb_nfs : "<custom.dns>:/<NFS Export Name>")
 }
 output "qumulo_private_SMB" {
   description = "Private SMB UNC path for the Qumulo cluster"
-  value       = var.q_route53_provision ? module.route53-phz[0].smb : "\\<custom.dns>\\<SMB Share Name>"
+  value       = var.q_route53_provision && !module.qconfig.multi_az && !var.q_nlb_provision ? module.route53-phz[0].smb : (module.qconfig.multi_az || var.q_nlb_provision ? module.nlb-qumulo[0].nlb_smb : "\\<custom.dns>\\<SMB Share Name>")
 }
 output "qumulo_private_url" {
   description = "Private URL for the Qumulo cluster"
-  value       = var.q_route53_provision ? module.route53-phz[0].url : "https://<custom.dns>"
+  value       = var.q_route53_provision && !module.qconfig.multi_az && !var.q_nlb_provision ? module.route53-phz[0].url : (module.qconfig.multi_az || var.q_nlb_provision ? module.nlb-qumulo[0].nlb_url : "https://<custom.dns>")
 }
 output "qumulo_private_url_node1" {
   description = "Link to private IP for Qumulo Cluster - Node 1"
   value       = module.qcluster.url
+}
+output "qumulo_public_url" {
+  description = "Link to public IP for Qumulo Cluster"
+  value       = var.q_public_mgmt_provision ? module.nlb-management[0].url : null
 }
 
 #Uncomment any of the submodule outputs below to get all outputs for a given submodule
@@ -66,9 +70,11 @@ output "qumulo_private_url_node1" {
 output "outputs_secret_module" {
   value = module.secrets
 }
+*/
 output "outputs_qconfig_module" {
   value = module.qconfig
 }
+/*
 output "outputs_qami-id-lookup_module" {
   value = module.qami-id-lookup
 }
@@ -80,5 +86,8 @@ output "outputs_route53-phz_module" {
 }
 output "outputs_cloudwatch_module" {
   value = module.cloudwatch
+}
+output "outputs_nlb_qumulo_module" {
+  value = module.nlb-qumulo
 }
 */

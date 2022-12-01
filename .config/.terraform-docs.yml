@@ -75,6 +75,7 @@ content: |-
   | Optional: Add R53 PHZ DNS for Floating IPs || ✅ |
   | Optional: Add CIDRS to Qumulo Security Group || ✅ |
   | Optional: Add SG IDs to Qumulo Cluster || ✅ |
+  | Optional: Deploy with an NLB || ✅ |  
   | Optional: Add Qumulo Public Management || ✅ |
   | Optional: Add Qumulo Public Replication Port || ✅ |
   | Optional: Enable CloudWatch Audit Log Messages || ✅ |

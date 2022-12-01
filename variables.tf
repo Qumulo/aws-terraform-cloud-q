@@ -285,6 +285,30 @@ variable "q_marketplace_type" {
     error_message = "The q_marketplace_type must be 1TB-Usable-All-Flash, 12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 103TB-Usable-All-Flash, 270TB-Usable-Hybrid-st1, 809TB-Usable-Hybrid-st1, Custom-1TB-6PB, or Specified-AMI-ID offering. Choose the appropriate offering."
   }
 }
+variable "q_nlb_cross_zone" {
+  description = "OPTIONAL: AWS NLB Enable cross-AZ load balancing"
+  type        = bool
+  default     = false
+}
+variable "q_nlb_override_subnet_id" {
+  description = "OPTIONAL: Private Subnet ID for NLB if deploying in subnet(s) other than subnet(s) the cluster is deployed in"
+  type        = string
+  default     = null
+  validation {
+    condition     = var.q_nlb_override_subnet_id == null || can(regex("^subnet-", var.q_nlb_override_subnet_id))
+    error_message = "The q_nlb_override_subnet_id must be a valid Subnet ID or list of Subnet IDs of the form 'subnet-', or null if deploying in the same subnet(s) as the cluster."
+  }
+}
+variable "q_nlb_provision" {
+  description = "OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for load balancing and client failover"
+  type        = bool
+  default     = false
+}
+variable "q_nlb_stickiness" {
+  description = "OPTIONAL: AWS NLB sticky sessions"
+  type        = bool
+  default     = true
+}
 variable "q_node_count" {
   description = "Single AZ Qumulo cluster - node count"
   type        = number
@@ -307,6 +331,11 @@ variable "q_permissions_boundary" {
   description = "OPTIONAL: Apply an IAM Permissions Boundary Policy to the Qumulo IAM roles that are created for the Qumulo cluster and provisioning instance. This is an account based policy and is optional. Qumulo's IAM roles conform to the least privilege model."
   type        = string
   default     = null
+}
+variable "q_public_mgmt_provision" {
+  description = "OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for a public managment interface.  Not for production, test environments only."
+  type        = bool
+  default     = false
 }
 variable "q_public_replication_provision" {
   description = "OPTIONAL: Enable port 3712 for replication from on-prem Qumulo systems using the public IP of the NLB for Qumulo Managment. Requires q_public_management_provision=true above."

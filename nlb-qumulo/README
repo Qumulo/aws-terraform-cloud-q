@@ -1,5 +1,0 @@
-#This module builds a Network Load balancer (NLB) for all client/workload traffi in front of the Qumulo cluster.
-#All configuration options are specified in the root module.
-#This module is NOT called from root main.tf because Terraform cannot deal with an unknown number of values prior to apply.  This is a well documented Terraform issue.
-#By executing this module seperately we avoid the maintenance issues with Terraform -target
-#Apply this Terraform module subsequent to applying the root module if you want an NLB for load distribution instead of DNS.

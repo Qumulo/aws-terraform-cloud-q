@@ -44,6 +44,14 @@ variable "max_nodes_down" {
   description = "Maximum number of nodes that may be offline with full cluster functionality"
   type        = number
 }
+variable "nlb_provision" {
+  description = "Provision AWS NLB"
+  type        = bool
+}
+variable "nlb_subnet_ids" {
+  description = "AWS NLB subnet identifiers"
+  type        = list(string)
+}
 variable "node_count" {
   description = "Qumulo cluster node count"
   type        = number

@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-# **** Version 4.4 ****
+# **** Version 4.6 ****
 
 data "aws_caller_identity" "current" {}
 
@@ -46,6 +46,7 @@ locals {
   #make lists for subnet IDs
   private_subnet_ids = tolist(split(",", replace(var.private_subnet_id, "/\\s*/", "")))
   public_subnet_ids  = var.public_subnet_id == null ? [] : tolist(split(",", replace(var.public_subnet_id, "/\\s*/", "")))
+  nlb_subnet_ids     = var.q_nlb_override_subnet_id == null ? local.private_subnet_ids : tolist(split(",", replace(var.q_nlb_override_subnet_id, "/\\s*/", "")))
 }
 
 #Generates a 11 digit random alphanumeric for the deployment_unique_name.  Generated on first apply and never changes.
@@ -120,6 +121,8 @@ module "qconfig" {
   floating_ips_per_node  = var.q_floating_ips_per_node
   marketplace_type       = var.q_marketplace_type
   max_nodes_down         = 1 #Do not change this
+  nlb_subnet_ids         = local.nlb_subnet_ids
+  nlb_provision          = var.q_nlb_provision
   node_count             = var.q_node_count
   nodes_per_az           = var.q_nodes_per_az
   private_subnet_ids     = local.private_subnet_ids
@@ -215,7 +218,6 @@ module "qprovisioner" {
   upgrade_s3_prefix          = local.upgrade_s3_prefix
 
   tags = var.tags
-
 }
 
 #This sub-module provisions the Qumulo Sidecar Lambda functions for EBS volume replacement and CloudWatch metrics.
@@ -241,7 +243,7 @@ module "qsidecar" {
 #IPs listed in the main output.
 #Likewise this module may be skipped if the floating IPs are added to a different PHZ R53 instance for the VPC.
 module "route53-phz" {
-  count = var.q_route53_provision && !module.qconfig.multi_az ? 1 : 0
+  count = var.q_route53_provision && !module.qconfig.multi_az && !var.q_nlb_provision ? 1 : 0
 
   source = "./modules/route53-phz"
 
@@ -254,7 +256,7 @@ module "route53-phz" {
   tags = var.tags
 }
 
-#This module creates a resource groups for filtered views of EC2, EBS SSD, and EBS HDD.
+#This module creates resource groups for filtered views of EC2, EBS SSD, and EBS HDD.
 #It also creates a log group for Qumulo audit logs and CloudWatch dashboard for the cluster.
 module "cloudwatch" {
   source = "./modules/cloudwatch"
@@ -269,37 +271,49 @@ module "cloudwatch" {
   tags = var.tags
 }
 
-#Stores variables in SSM parameter store for use by the standalone nlb-management module.
-resource "aws_ssm_parameter" "nlb-management" {
-  name = "/qumulo/${local.deployment_unique_name}/nlb-management/vars"
-  type = "String"
-  value = jsonencode({
-    aws_vpc_id                   = var.aws_vpc_id
-    cluster_primary_ips          = module.qcluster.primary_ips
-    public_replication_provision = var.q_public_replication_provision
-    public_subnet_ids            = module.qconfig.public_subnet_ids
-    random_alphanumeric          = random_string.alphanumeric.id
-    term_protection              = var.term_protection
-    tags                         = var.tags
-  })
+#This module creates an AWS NLB in front of the Qumulo cluster for load distribution and fault tolerance.
+#Floating IPs are disabled when using this module because DNS is no longer used for load distribution
+#and floating IPs are no longer relevant for IP failover.  NLBs cost more $ and NFSv3 locking is not
+#reliable through an NLB.  An NLB is optional for single AZ deployments and mandatory for multi-AZ
+#deployments.  See the docs.
+module "nlb-qumulo" {
+  count = var.q_nlb_provision || module.qconfig.multi_az ? 1 : 0
+
+  source = "./modules/nlb-qumulo"
+
+  aws_vpc_id             = var.aws_vpc_id
+  cluster_primary_ips    = module.qcluster.primary_ips
+  cross_zone             = var.q_nlb_cross_zone
+  deployment_unique_name = local.deployment_unique_name
+  dereg_delay            = 60
+  dereg_term             = false
+  node_count             = module.qconfig.node_count
+  preserve_ip            = true
+  private_subnet_ids     = module.qconfig.nlb_subnet_ids
+  proxy_proto_v2         = false
+  random_alphanumeric    = random_string.alphanumeric.id
+  stickiness             = var.q_nlb_stickiness
+  term_protection        = var.term_protection
+
+  tags = var.tags
 }
 
-#Stores variables in SSM parameter store for use by the standalone nlb-qumulo module.
-resource "aws_ssm_parameter" "nlb-qumulo" {
-  name = "/qumulo/${local.deployment_unique_name}/nlb-qumulo/vars"
-  type = "String"
-  value = jsonencode({
-    aws_vpc_id          = var.aws_vpc_id
-    cluster_primary_ips = module.qcluster.primary_ips
-    cross_zone          = false
-    dereg_delay         = 60
-    dereg_term          = false
-    preserve_ip         = true
-    private_subnet_ids  = module.qconfig.private_subnet_ids
-    proxy_proto_v2      = false
-    random_alphanumeric = random_string.alphanumeric.id
-    stickiness          = true
-    term_protection     = var.term_protection
-    tags                = var.tags
-  })
+#This module creates an AWS NLB in front of the Qumulo cluster in a public subnet for high-availability
+#public management connectivity. It is provided for test environments and is not intended for use in
+#production environments.  While it only listens on port 443 and 3712 it depends on the inherent DDoS
+#protection provided by the AWS NLB, which is just one layer of security.
+module "nlb-management" {
+  count = var.q_public_mgmt_provision ? 1 : 0
+
+  source = "./modules/nlb-management"
+
+  aws_vpc_id                   = var.aws_vpc_id
+  cluster_primary_ips          = module.qcluster.primary_ips
+  deployment_unique_name       = local.deployment_unique_name
+  node_count                   = module.qconfig.node_count
+  public_replication_provision = var.q_public_replication_provision
+  public_subnet_ids            = module.qconfig.public_subnet_ids
+  random_alphanumeric          = random_string.alphanumeric.id
+
+  tags = var.tags
 }

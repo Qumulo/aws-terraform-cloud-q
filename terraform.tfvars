@@ -107,9 +107,24 @@ q_fqdn_name         = "my-dns-name.local"
 q_record_name       = "qumulo"
 q_route53_provision = false
 
+# ***** OPTIONAL module 'nlb-qumulo' *****
+# ----- Disables any R53 provisioning, disables floating IPs, used for multi-AZ deployments or single AZ deployments that require PrivateLink
+# q_nlb_cross_zone                  - true/false to enable cross AZ load balancing.  Only relevant for multi-AZ deployments.
+# q_nlb_override_subnet_id          - Default = null.  If q_nlb_provision = true, the NLB will be deployed in the same subnet(s) as the cluster.
+#                                       To override enter a Private Subnet to deploy the NLB in, or a comma delimited list with four subnets if deploying a multi-AZ distributed cluster
+#                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
+# q_nlb_provision                   - true/false to enable deployment of the NLB.  If the qconfig module senses multi-AZ it will deploy the NLB in the same subnets as the cluster
+# q_nlb_stickiness                  - true/false to enable sticky sessions
+q_nlb_cross_zone         = false
+q_nlb_override_subnet_id = null
+q_nlb_provision          = false
+q_nlb_stickiness         = true
+
 # ***** OPTIONAL module 'nlb-management' *****
-# ----- Init and apply 'nlb-management' after applying the root main.tf if you desire public management
-# public_subnet_id                  - AWS public subnet ID
+# ----- Deploys an NLB in a public subnet for public management reachability.  Test environments only.  Not for production.
+# public_subnet_id                  - AWS public subnet ID(s), one for single AZ, 4 or more for multi-AZ as a comma delimited string
+# q_public_mgmt_provision           - true/false to enable deployment of the management NLB
 # q_public_replication_provision    - true/false to enable Qumulo replication port
-public_subnet_id               = "subnet-1234567890abcdefg"
-q_public_replication_provision = false
+public_subnet_id               = null
+q_public_mgmt_provision        = false
+q_public_replication_provision = true

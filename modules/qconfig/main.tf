@@ -30,6 +30,11 @@ data "aws_subnet" "public_subnet_ids_map" {
 
   id = each.key
 }
+data "aws_subnet" "nlb_subnet_ids_map" {
+  for_each = toset(var.nlb_subnet_ids)
+
+  id = each.key
+}
 
 data "aws_ssm_parameter" "max-nodes-down" {
   name = "/qumulo/${var.deployment_unique_name}/max-nodes-down"
@@ -40,7 +45,8 @@ data "aws_ssm_parameter" "max-nodes-down" {
 locals {
   #Find the number of AZs desired
   number_azs     = length(var.private_subnet_ids)
-  number_pub_azs = var.public_subnet_ids == null ? 0 : length(var.public_subnet_ids)
+  number_pub_azs = length(var.public_subnet_ids)
+  number_nlb_azs = length(var.nlb_subnet_ids)
   maz            = local.number_azs > 1
   saz            = !local.maz
 
@@ -50,6 +56,7 @@ locals {
 
   valid_number_azs     = local.number_azs == 1 || local.number_azs == 4 || local.number_azs == 5
   valid_number_pub_azs = local.number_pub_azs == 0 || local.number_azs == local.number_pub_azs
+  valid_number_nlb_azs = local.number_nlb_azs == local.number_azs
   valid_4_maz_mp_type  = local.saz || local.number_azs == 5 || (local.number_azs == 4 && lookup(var.marketplace_map[var.marketplace_type], "MAZ4"))
   valid_5_maz_mp_type  = local.saz || local.number_azs == 4 || (local.number_azs == 5 && lookup(var.marketplace_map[var.marketplace_type], "MAZ5"))
   invalid_disk_config  = var.disk_config == null && (var.marketplace_type == "Specified-AMI-ID" || var.marketplace_type == "Custom-1TB-6PB")
@@ -69,7 +76,7 @@ locals {
   #Validate max_nodes_down
   valid_max_nodes_down  = var.max_nodes_down == 1 && local.node_count > 3 || var.max_nodes_down == 2 && local.node_count > 7 || var.max_nodes_down == 3 && local.node_count > 10 || var.max_nodes_down == 4 && local.node_count > 23
   max_nodes_down        = local.saz ? var.max_nodes_down : var.nodes_per_az
-  floating_ips_per_node = local.saz ? var.floating_ips_per_node : 0
+  floating_ips_per_node = local.saz && !var.nlb_provision ? var.floating_ips_per_node : 0
 
   #swap the key to the AZ name and the map will sort based on the AZ name
   private_azs_map = {
@@ -78,12 +85,18 @@ locals {
   public_azs_map = {
     for v in data.aws_subnet.public_subnet_ids_map : v.availability_zone => v.id...
   }
+  nlb_azs_map = {
+    for v in data.aws_subnet.nlb_subnet_ids_map : v.availability_zone => v.id...
+  }
 
   #get the private AZ IDs to check for us-east-1 invalid AZ
   private_az_ids = [
     for v in data.aws_subnet.private_subnet_ids_map : v.availability_zone_id
   ]
-  invalid_us_east_az_ids = contains(local.private_az_ids, "use1-az3")
+  nlb_az_ids = [
+    for v in data.aws_subnet.nlb_subnet_ids_map : v.availability_zone_id
+  ]
+  invalid_us_east_az_ids = contains(local.private_az_ids, "use1-az3") || contains(local.nlb_az_ids, "use1-az3")
 
   #get the subnet IDs
   private_subnet_id_per_az = [
@@ -91,6 +104,9 @@ locals {
   ]
   public_subnet_id_per_az = [
     for v in local.public_azs_map : v[0]
+  ]
+  nlb_subnet_id_per_az = [
+    for v in local.nlb_azs_map : v[0]
   ]
 
   #build the full list of subnet IDs for every node, keeping order
@@ -109,8 +125,12 @@ locals {
   public_azs = [
     for k, v in local.public_azs_map : k
   ]
+  nlb_azs = [
+    for k, v in local.nlb_azs_map : k
+  ]
   unique_azs     = length(local.private_azs) == local.number_azs
   unique_pub_azs = length(local.public_azs) == local.number_pub_azs
+  unique_nlb_azs = length(local.nlb_azs) == local.number_nlb_azs
 
   #Use an invalid function to test the error condition.  A null resource with count can't be used because of the dependency on the previous deployment value from parameter store.
   invalid_maz_add = local.valid_maz_add ? "" : SEE_ERROR_MESSAGE(true ? null : "ERROR: A multi-AZ deployment may only grow from 1 to 2 nodes per AZ.  For a 3 nodes per AZ a new cluster must be deployed.")
@@ -140,6 +160,9 @@ resource "null_resource" "check_valid_number_azs" {
 resource "null_resource" "check_valid_number_pub_azs" {
   count = local.valid_number_pub_azs ? 0 : "var.q_public_management_provision = true and the number of public subnet IDs doesn't match the number of private subnet IDs."
 }
+resource "null_resource" "check_valid_number_nlb_azs" {
+  count = local.valid_number_nlb_azs ? 0 : "var.q_nlb_override_subnet_id is not null and the number of subnet IDs for the NLB doesn't match the number of private subnet IDs for the cluster."
+}
 resource "null_resource" "check_valid_4_maz_mp_type" {
   count = local.valid_4_maz_mp_type ? 0 : "Invalid Marketplace type for a 4xAZ deployment. 1TB-Usable-All-Flash, 12TB-Usable-Hybrid-st1, Custom-1TB-6PB, or Specified-AMI-ID are supported."
 }
@@ -155,8 +178,11 @@ resource "null_resource" "check_valid_5_maz_region" {
 resource "null_resource" "check_unique_azs" {
   count = local.unique_azs ? 0 : "Two or more of the private subnet IDs provided are in the same AZ."
 }
+resource "null_resource" "check_unique_nlb_azs" {
+  count = local.unique_nlb_azs ? 0 : "Two or more of the q_nlb_override_subnet_ids provided are in the same AZ."
+}
 resource "null_resource" "check_invalid_us_east_az_ids" {
-  count = !local.invalid_us_east_az_ids ? 0 : "AWS us-east-1 AZ ID = use1-az3 does not support Qumulo required EC2 instance types."
+  count = !local.invalid_us_east_az_ids ? 0 : "AWS us-east-1 AZ ID = use1-az3 does not support Qumulo required EC2 instance types. Either or both q_private_subnet_id and q_nlb_overried_private_subnet_id have an invalid subnet ID."
 }
 resource "null_resource" "check_max_nodes_down" {
   count = local.valid_max_nodes_down ? 0 : "The number of nodes in the cluster isn't large enough to support the desired max_nodes_down.  Minimum cluster size -> max_nodes_down: 4->1, 8->2, 11->3, 24->4."
