@@ -20,22 +20,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-variable "execution_id" {
-    type = string
-    description = "A unique value to identify this execution by"
-}
-
-variable "vpc_cidr" {
-    type = string
-    description = "A CIDR block for the vpc"
-}
-
-variable "private_azs" {
-    type = list
-    description = "The AZs to use for the private subnet, use one for a single AZ cluster"
-}
-
-variable "public_azs" {
-    type = list
-    description = "The AZs to use for the public subnet(s), cannot overlap with the AZs in 'private_azs'"
-}
+vpc_cidr = "10.0.0.0/24"
+private_azs = ["us-west-2a"]
+public_azs = []
