@@ -1,9 +1,4 @@
 # ****************************** Required *************************************************************
-# ***** Terraform Variables *****
-# deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
-#                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
-deployment_name = "cloud-q-github-test"
-
 # ***** S3 Bucket Variables *****
 # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
 # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
@@ -14,15 +9,10 @@ s3_bucket_region = "us-west-2"
 
 # ***** AWS Variables *****
 # aws_region                        - Region for the deployment of the cluster
-# aws_vpc_id                        - The VPC for the deployment within the provided region
 # ec2_keypair                       - EC2 key pair within the region
-# private_subnet_id                 - Private Subnet to deploy the cluster in, or a comma delimited list with four subnets if deploying a multi-AZ distributed cluster
-#                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
 # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
 aws_region        = "us-west-2"
-aws_vpc_id        = "vpc-08c2f1aff25a6a4a6"
 ec2_key_pair      = "aws-terraform-cloud-q-ec2-key-pair-3a032030-cb5e-4c3a-a80c-10773a9a65ae"
-private_subnet_id = "subnet-04ea8797c519f9ea1, subnet-0918ca172fbb5f567, subnet-0b7a098eeb9d8d894, subnet-002610e631f044f6b"
 term_protection   = false
 
 # ***** Qumulo Cluster Variables *****

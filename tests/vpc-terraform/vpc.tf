@@ -43,7 +43,7 @@ resource "aws_subnet" "private" {
   # the second parameter to cidrsubnet is the additional bits (so base 2) to add to the / to make the subnet ip range smaller
   # e.g., by specifying 2, /20 will become /22 which will give 4 subnets, 3 will make /20 into /23, which will give 8 subnets
   # Note, we need the number of subnets >= length(var.private_azs) + length(var.public_azs)
-  cidr_block        = cidrsubnet(aws_vpc.test_vpc.cidr_block, 2, count.index)
+  cidr_block        = cidrsubnet(aws_vpc.test_vpc.cidr_block, 4, count.index)
   availability_zone = var.private_azs[count.index]
   tags = {
       Owner = "aws-terraform-cloud-q-testing"
@@ -55,7 +55,7 @@ resource "aws_subnet" "public" {
   count  = length(var.public_azs)
   vpc_id = aws_vpc.test_vpc.id
   # by using length(var.private_azs) we are putting these after the private subnets.
-  cidr_block        = cidrsubnet(aws_vpc.test_vpc.cidr_block, 2, length(var.private_azs) + count.index)
+  cidr_block        = cidrsubnet(aws_vpc.test_vpc.cidr_block, 4, length(var.private_azs) + count.index)
   availability_zone = var.public_azs[count.index]
   tags = {
       Owner = "aws-terraform-cloud-q-testing"
@@ -67,6 +67,7 @@ resource "aws_subnet" "public" {
     vpc_id =  aws_vpc.test_vpc.id
     tags = {
         Owner = "aws-terraform-cloud-q-testing"
+        Name = "aws-terraform-cloud-q-igw-${var.execution_id}"
     }
  }
 
