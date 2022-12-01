@@ -26,31 +26,47 @@ import uuid
 from tests.utils import TerraformExecutor, TerraformLogLevel
 
 
-class TestDeployVPC(unittest.TestCase):
-    def test_happy_path(self):
-        executor = TerraformExecutor(
+# class TestDeployVPC(unittest.TestCase):
+#     def test_happy_path(self):
+#         executor = TerraformExecutor(
+#             terraform_workspace='test',
+#             terraform_vars_file='terraform_single_az.tfvars',
+#             terraform_vars={"execution_id": str(uuid.uuid4())},
+#             module_path='tests/vpc-terraform',
+#             log_level=TerraformLogLevel.INFO,
+#         )
+#         try:
+#             results = executor.deploy()
+#             self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
+#             outputs = executor.output()
+#             self.assertIsNotNone(outputs['vpc_id'])
+#             self.assertEqual(1, len(outputs['private_subnet_ids']))
+#             self.assertEqual(0, len(outputs['public_subnet_ids']))
+#         finally:
+#             executor.destroy()
+
+class TestDeployClusterUsingCloudQ(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.vpc_executor = TerraformExecutor(
             terraform_workspace='test',
-            terraform_vars_file='terraform_single_az.tfvars',
+            terraform_vars_file='terraform_multi_az.tfvars',
             terraform_vars={"execution_id": str(uuid.uuid4())},
             module_path='tests/vpc-terraform',
             log_level=TerraformLogLevel.INFO,
         )
-        try:
-            results = executor.deploy()
-            self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
-            outputs = executor.output()
-            self.assertIsNotNone(outputs['vpc_id'])
-            self.assertEqual(1, len(outputs['private_subnet_ids']))
-            self.assertEqual(0, len(outputs['public_subnet_ids']))
-        finally:
-            executor.destroy()
+        cls.vpc_executor.deploy()
+        cls.outputs = cls.vpc_executor.output()
 
-class TestDeployClusterUsingCloudQ(unittest.TestCase):
     def test_happy_path(self):
         executor = TerraformExecutor(
             terraform_workspace='test',
             terraform_vars_file='terraform_tests.tfvars',
-            terraform_vars={},
+            terraform_vars={
+                'deployment_name': f'cloud-q-test-{uuid.uuid4()}',
+                'aws_vpc_id': self.outputs['vpc_id'],
+                'private_subnet_id': ','.join(self.outputs['private_subnet_ids']),
+            },
             module_path='.',
             log_level=TerraformLogLevel.INFO,
         )
@@ -59,3 +75,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
             self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
         finally:
             executor.destroy()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.vpc_executor.destroy()
