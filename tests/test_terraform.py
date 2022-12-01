@@ -18,3 +18,18 @@ class TestDeployVPC(unittest.TestCase):
             self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
         finally:
             executor.destroy()
+
+class TestDeployClusterUsingCloudQ(unittest.TestCase):
+    def test_happy_path(self):
+        executor = TerraformExecutor(
+            terraform_workspace='test',
+            terraform_vars_file='terraform_tests.tfvars',
+            terraform_vars={},
+            module_path='.',
+            log_level=TerraformLogLevel.INFO,
+        )
+        try:
+            results = executor.deploy()
+            self.assertEqual(0, results.returncode, msg=f'Deployment was not successful, check the session output')
+        finally:
+            executor.destroy()
