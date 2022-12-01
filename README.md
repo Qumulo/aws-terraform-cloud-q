@@ -378,7 +378,6 @@ This repo is self documenting via Terraform-Docs.
 | Name | Description |
 |------|-------------|
 | <a name="output_deployment_unique_name"></a> [deployment\_unique\_name](#output\_deployment\_unique\_name) | The unique name for this deployment. |
-| <a name="output_outputs_qconfig_module"></a> [outputs\_qconfig\_module](#output\_outputs\_qconfig\_module) | n/a |
 | <a name="output_qumulo_cluster_provisioned"></a> [qumulo\_cluster\_provisioned](#output\_qumulo\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records. |
 | <a name="output_qumulo_knowledge_base"></a> [qumulo\_knowledge\_base](#output\_qumulo\_knowledge\_base) | Qumulo knowledge base |
