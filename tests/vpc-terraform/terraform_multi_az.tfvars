@@ -22,4 +22,4 @@
 
 vpc_cidr = "10.0.0.0/24"
 private_azs = ["us-west-2a", "us-west-2b", "us-west-2c", "us-west-2d"]
-public_azs = []
+public_azs = ["us-west-2a", "us-west-2b", "us-west-2c", "us-west-2d"]
