@@ -24,7 +24,7 @@ resource "aws_lb" "int_nlb" {
   name                             = "qumulo-int-${var.random_alphanumeric}"
   enable_cross_zone_load_balancing = var.cross_zone
   enable_deletion_protection       = var.term_protection
-  internal                         = true
+  internal                         = !var.is_public
   ip_address_type                  = "ipv4"
   load_balancer_type               = "network"
   subnets                          = var.private_subnet_ids

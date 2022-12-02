@@ -68,6 +68,11 @@ variable "stickiness" {
   description = "AWS NLB sticky sessions"
   type        = bool
 }
+variable "is_public" {
+  description = "OPTIONAL: Makes the NLB for the cluster internal, setting this to true will allow anyone to reach the cluster"
+  type        = bool
+  default     = false
+}
 variable "tags" {
   description = "Additional global tags"
   type        = map(string)

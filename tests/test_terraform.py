@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import subprocess
 import unittest
 import uuid
 
@@ -73,6 +74,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
                 "q_nlb_cross_zone": "true",
                 "q_nlb_provision": "true",
+                "q_nlb_internal": "false",
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
@@ -80,6 +82,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
         
         try:
             results = executor.deploy()
+            outputs = executor.output()
             self.assertEqual(
                 0,
                 results.returncode,
@@ -98,6 +101,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "private_subnet_id": self.outputs["private_subnet_ids"][0],
                 "q_node_count": 4,
                 "q_nlb_provision": "true",
+                "q_nlb_internal": "false",
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
