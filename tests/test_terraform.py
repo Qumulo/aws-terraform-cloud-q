@@ -71,10 +71,13 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
                 "aws_vpc_id": self.outputs["vpc_id"],
                 "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
+                "q_nlb_cross_zone": "true",
+                "q_nlb_provision": "true",
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
         )
+        
         try:
             results = executor.deploy()
             self.assertEqual(
@@ -94,6 +97,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "aws_vpc_id": self.outputs["vpc_id"],
                 "private_subnet_id": self.outputs["private_subnet_ids"][0],
                 "q_node_count": 4,
+                "q_nlb_provision": "true",
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
