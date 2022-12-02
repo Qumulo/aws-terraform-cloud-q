@@ -31,7 +31,7 @@ class TestDeployVPC(unittest.TestCase):
         executor = TerraformExecutor(
             terraform_workspace="test",
             terraform_vars_file="terraform_single_az.tfvars",
-            terraform_vars={"execution_id": str(uuid.uuid4())},
+            terraform_vars={"execution_id": f"foundation-test-{uuid.uuid4()}"[:32]},
             module_path="tests/vpc-terraform",
             log_level=TerraformLogLevel.INFO,
         )
