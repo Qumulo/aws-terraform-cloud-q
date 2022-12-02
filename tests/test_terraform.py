@@ -65,6 +65,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
         cls.outputs = cls.vpc_executor.output()
 
     def test_multi_az_min_path(self):
+        cluster_password = f"8_M(p_{str(uuid.uuid4())}"
         executor = TerraformExecutor(
             terraform_workspace="test",
             terraform_vars_file="terraform_tests.tfvars",
@@ -72,6 +73,8 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
                 "aws_vpc_id": self.outputs["vpc_id"],
                 "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
+                "public_subnet_id": ",".join(self.outputs["public_subnet_ids"]),
+                "q_cluster_admin_password": cluster_password,
                 "q_nlb_cross_zone": "true",
                 "q_nlb_provision": "true",
                 "q_nlb_internal": "false",
@@ -88,6 +91,8 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 results.returncode,
                 msg=f"Deployment was not successful, check the session output",
             )
+            subprocess.Popen("cli/qq --host {host} login -u {user} -p '{password}'".format(password=cluster_password, user='admin', host=outputs['qumulo_nlb_dns']), shell=True).communicate()
+
         finally:
             executor.destroy()
 
