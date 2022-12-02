@@ -93,6 +93,7 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
                 "deployment_name": f"cloud-q-test-single-az-{uuid.uuid4()}"[:32],
                 "aws_vpc_id": self.outputs["vpc_id"],
                 "private_subnet_id": self.outputs["private_subnet_ids"][0],
+                "q_node_count": 4,
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,

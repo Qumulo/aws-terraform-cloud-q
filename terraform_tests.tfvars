@@ -27,7 +27,7 @@ term_protection   = false
 q_cluster_admin_password = "!MyPwd123"
 q_cluster_name           = "Cloud-Q"
 q_cluster_version        = "5.1.0.1"
-q_instance_type          = "m5.2xlarge"
+q_instance_type          = "m5.xlarge"
 q_marketplace_type       = "1TB-Usable-All-Flash"
 
 # ***** Qumulo Sidecar Variables *****
@@ -66,7 +66,7 @@ q_nodes_per_az = 1
 # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
 #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
 #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-dev_environment = false
+dev_environment = true
 tags            = null
 
 # ***** Qumulo Cluster Misc Options *****

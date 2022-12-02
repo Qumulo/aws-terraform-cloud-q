@@ -20,6 +20,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-vpc_cidr = "10.0.0.0/24"
+vpc_cidr = "10.0.0.0/16"
 private_azs = ["us-west-2a", "us-west-2b", "us-west-2c", "us-west-2d"]
 public_azs = ["us-west-2a", "us-west-2b", "us-west-2c", "us-west-2d"]
