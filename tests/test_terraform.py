@@ -63,14 +63,36 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
         cls.vpc_executor.deploy()
         cls.outputs = cls.vpc_executor.output()
 
-    def test_happy_path(self):
+    def test_multi_az_min_path(self):
         executor = TerraformExecutor(
             terraform_workspace="test",
             terraform_vars_file="terraform_tests.tfvars",
             terraform_vars={
-                "deployment_name": f"cloud-q-test-{uuid.uuid4()}"[:32],
+                "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
                 "aws_vpc_id": self.outputs["vpc_id"],
                 "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
+            },
+            module_path=".",
+            log_level=TerraformLogLevel.INFO,
+        )
+        try:
+            results = executor.deploy()
+            self.assertEqual(
+                0,
+                results.returncode,
+                msg=f"Deployment was not successful, check the session output",
+            )
+        finally:
+            executor.destroy()
+
+    def test_single_az_min_path(self):
+        executor = TerraformExecutor(
+            terraform_workspace="test",
+            terraform_vars_file="terraform_tests.tfvars",
+            terraform_vars={
+                "deployment_name": f"cloud-q-test-single-az-{uuid.uuid4()}"[:32],
+                "aws_vpc_id": self.outputs["vpc_id"],
+                "private_subnet_id": self.outputs["private_subnet_ids"][0],
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
