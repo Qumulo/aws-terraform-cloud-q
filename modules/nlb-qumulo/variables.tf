@@ -56,6 +56,10 @@ variable "private_subnet_ids" {
   description = "AWS private subnet identifiers"
   type        = list(string)
 }
+variable "public_subnet_ids" {
+  description = "AWS public subnet identifiers"
+  type        = list(string)
+}
 variable "proxy_proto_v2" {
   description = "AWS NLB proxy header"
   type        = bool
