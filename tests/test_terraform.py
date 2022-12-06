@@ -119,8 +119,8 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
             terraform_vars={
                 "deployment_name": f"cloud-q-test-single-az-{uuid.uuid4()}"[:32],
                 "aws_vpc_id": self.outputs["vpc_id"],
-                "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
-                "public_subnet_id": ",".join(self.outputs["public_subnet_ids"]),
+                "private_subnet_id": self.outputs["private_subnet_ids"][0],
+                "public_subnet_id": self.outputs["public_subnet_ids"][0],
                 "q_node_count": self.QUMULO_CLUSTER_NODES,
                 "q_cluster_admin_password": cluster_password,
             },
