@@ -26,7 +26,7 @@ import os
 import stat
 import subprocess
 from tempfile import NamedTemporaryFile
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 
 class TerraformLogLevel(Enum):
@@ -49,7 +49,7 @@ def build_setup_commands(terraform_workspace: str, module_path: str) -> str:
 def build_terraform_command(
     terraform_workspace: str,
     terraform_vars_file: str,
-    terraform_vars: dict[str, str],
+    terraform_vars: Dict[str, Union[str, int]],
     module_path: str,
     log_level: TerraformLogLevel,
     cmd: str,
@@ -77,7 +77,7 @@ class TerraformExecutor(object):
         self,
         terraform_workspace: str,
         terraform_vars_file: str,
-        terraform_vars: Dict[str, str],
+        terraform_vars: Dict[str, Union[str, int]],
         module_path: str,
         log_level: TerraformLogLevel,
     ):

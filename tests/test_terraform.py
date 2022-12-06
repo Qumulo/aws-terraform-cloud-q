@@ -19,9 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+from abc import ABC, abstractmethod
+import subprocess
+from typing import Dict
 import unittest
 import uuid
+
 from qumulo.rest_client import RestClient
 
 from tests.utils import TerraformExecutor, TerraformLogLevel
@@ -51,11 +54,24 @@ class TestDeployVPC(unittest.TestCase):
             executor.destroy()
 
 
-class TestDeployClusterUsingCloudQ(unittest.TestCase):
+class BaseClusterTests(ABC, unittest.TestCase):
+    # Tell pytest to skip this test class
+    __test__ = False
+
+    CLUSTER_PASSWORD = f"8_M(p_{str(uuid.uuid4())}"
     QUMULO_CLUSTER_NODES = 4
+
+    vpc_executor_deploy_result: subprocess.CompletedProcess
+    vpc_executor_outputs: Dict[str, str]
+    qumulo_executor_deploy_result: subprocess.CompletedProcess
+    qumulo_executor_outputs: Dict[str, str]
 
     @classmethod
     def setUpClass(cls):
+        if cls is BaseClusterTests:
+            raise unittest.SkipTest("Skip BaseClusterTests base class")
+
+        # Deploy the VPC
         cls.vpc_executor = TerraformExecutor(
             terraform_workspace="test",
             terraform_vars_file="terraform_multi_az.tfvars",
@@ -63,10 +79,41 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
             module_path="tests/vpc-terraform",
             log_level=TerraformLogLevel.INFO,
         )
-        cls.vpc_executor.deploy()
-        cls.outputs = cls.vpc_executor.output()
+        cls.vpc_executor_deploy_result = cls.vpc_executor.deploy()
+        cls.vpc_executor_outputs = cls.vpc_executor.output()
 
-    def verify_cluster_configuration(self, host: str, password: str):
+        # Deploy the Qumulo file system
+        cls.qumulo_executor = cls.create_qumulo_terraform_executor()
+        cls.qumulo_executor_deploy_result = cls.qumulo_executor.deploy()
+        cls.qumulo_executor_outputs = cls.qumulo_executor.output()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls is BaseClusterTests:
+            raise unittest.SkipTest("Skip BaseClusterTests base class")
+
+        # Clean up the Qumulo file system and AWS VPC
+        cls.qumulo_executor.destroy()
+        cls.vpc_executor.destroy()
+
+    def setUp(self) -> None:
+        self.assertEqual(
+            0,
+            self.vpc_executor_deploy_result.returncode,
+            msg=f"AWS VPC deployment was not successful. Check the session output.",
+        )
+        self.assertEqual(
+            0,
+            self.qumulo_executor_deploy_result.returncode,
+            msg=f"Qumulo file system deployment was not successful. Check the session output.",
+        )
+
+    @classmethod
+    @abstractmethod
+    def create_qumulo_terraform_executor(cls) -> TerraformExecutor:
+        ...
+
+    def assert_cluster_configuration(self, host: str, password: str):
         rest_client = RestClient(address=host, port=8000)
         rest_client.login(username="admin", password=password)
         version = rest_client.version.version()
@@ -80,67 +127,57 @@ class TestDeployClusterUsingCloudQ(unittest.TestCase):
         for node in nodes:
             self.assertEqual("online", node["node_status"])
 
-    def test_multi_az_min_path(self):
-        cluster_password = f"8_M(p_{str(uuid.uuid4())}"
-        executor = TerraformExecutor(
-            terraform_workspace="test",
-            terraform_vars_file="terraform_tests.tfvars",
-            terraform_vars={
-                "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
-                "aws_vpc_id": self.outputs["vpc_id"],
-                "private_subnet_id": ",".join(self.outputs["private_subnet_ids"]),
-                "public_subnet_id": ",".join(self.outputs["public_subnet_ids"]),
-                "q_cluster_admin_password": cluster_password,
-            },
-            module_path=".",
-            log_level=TerraformLogLevel.INFO,
+    # TEST CASES
+
+    def test_min_path(self):
+        self.assert_cluster_configuration(
+            host=self.qumulo_executor_outputs["qumulo_nlb_dns"],
+            password=self.CLUSTER_PASSWORD,
         )
 
-        try:
-            results = executor.deploy()
-            self.assertEqual(
-                0,
-                results.returncode,
-                msg=f"Deployment was not successful, check the session output",
-            )
-            outputs = executor.output()
-            self.verify_cluster_configuration(
-                host=outputs["qumulo_nlb_dns"], password=cluster_password
-            )
 
-        finally:
-            executor.destroy()
+class TestSingleAZ(BaseClusterTests):
+    __test__ = True
 
-    def test_single_az_min_path(self):
-        cluster_password = f"8_M(p_{str(uuid.uuid4())}"
-        executor = TerraformExecutor(
+    @classmethod
+    def create_qumulo_terraform_executor(cls) -> TerraformExecutor:
+        # Create a single AZ file system TerraformExecutor
+        return TerraformExecutor(
             terraform_workspace="test",
             terraform_vars_file="terraform_tests.tfvars",
             terraform_vars={
                 "deployment_name": f"cloud-q-test-single-az-{uuid.uuid4()}"[:32],
-                "aws_vpc_id": self.outputs["vpc_id"],
-                "private_subnet_id": self.outputs["private_subnet_ids"][0],
-                "public_subnet_id": self.outputs["public_subnet_ids"][0],
-                "q_node_count": self.QUMULO_CLUSTER_NODES,
-                "q_cluster_admin_password": cluster_password,
+                "aws_vpc_id": cls.vpc_executor_outputs["vpc_id"],
+                "private_subnet_id": cls.vpc_executor_outputs["private_subnet_ids"][0],
+                "public_subnet_id": cls.vpc_executor_outputs["public_subnet_ids"][0],
+                "q_node_count": cls.QUMULO_CLUSTER_NODES,
+                "q_cluster_admin_password": cls.CLUSTER_PASSWORD,
             },
             module_path=".",
             log_level=TerraformLogLevel.INFO,
         )
-        try:
-            results = executor.deploy()
-            self.assertEqual(
-                0,
-                results.returncode,
-                msg=f"Deployment was not successful, check the session output",
-            )
-            outputs = executor.output()
-            self.verify_cluster_configuration(
-                host=outputs["qumulo_nlb_dns"], password=cluster_password
-            )
-        finally:
-            executor.destroy()
+
+
+class TestMultiAZ(BaseClusterTests):
+    __test__ = True
 
     @classmethod
-    def tearDownClass(cls):
-        cls.vpc_executor.destroy()
+    def create_qumulo_terraform_executor(cls) -> TerraformExecutor:
+        # Create a multi AZ file system TerraformExecutor
+        return TerraformExecutor(
+            terraform_workspace="test",
+            terraform_vars_file="terraform_tests.tfvars",
+            terraform_vars={
+                "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
+                "aws_vpc_id": cls.vpc_executor_outputs["vpc_id"],
+                "private_subnet_id": ",".join(
+                    cls.vpc_executor_outputs["private_subnet_ids"]
+                ),
+                "public_subnet_id": ",".join(
+                    cls.vpc_executor_outputs["public_subnet_ids"]
+                ),
+                "q_cluster_admin_password": cls.CLUSTER_PASSWORD,
+            },
+            module_path=".",
+            log_level=TerraformLogLevel.INFO,
+        )
