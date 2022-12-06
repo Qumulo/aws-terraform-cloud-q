@@ -87,6 +87,7 @@ resource "aws_subnet" "public" {
     vpc_id = aws_vpc.test_vpc.id
     route {
         cidr_block = "0.0.0.0/0"
+        gateway_id = null
         nat_gateway_id = aws_nat_gateway.natgw.id
     }
     tags = {
@@ -117,7 +118,7 @@ resource "aws_subnet" "public" {
 
  resource "aws_nat_gateway" "natgw" {
    allocation_id = aws_eip.eip1.id
-   subnet_id     = length(var.public_azs) > 0 ? aws_subnet.public[0].id : aws_subnet.private[0].id
+   subnet_id     = aws_subnet.public[0].id
    tags = {
       Owner = "aws-terraform-cloud-q-testing"
       Name = "aws-terraform-cloud-q-natgw-${var.execution_id}"

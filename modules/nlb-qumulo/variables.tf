@@ -56,6 +56,10 @@ variable "private_subnet_ids" {
   description = "AWS private subnet identifiers"
   type        = list(string)
 }
+variable "public_subnet_ids" {
+  description = "AWS public subnet identifiers"
+  type        = list(string)
+}
 variable "proxy_proto_v2" {
   description = "AWS NLB proxy header"
   type        = bool
@@ -67,6 +71,11 @@ variable "random_alphanumeric" {
 variable "stickiness" {
   description = "AWS NLB sticky sessions"
   type        = bool
+}
+variable "is_public" {
+  description = "OPTIONAL: Makes the NLB for the cluster internal, setting this to true will allow anyone to reach the cluster"
+  type        = bool
+  default     = false
 }
 variable "tags" {
   description = "Additional global tags"

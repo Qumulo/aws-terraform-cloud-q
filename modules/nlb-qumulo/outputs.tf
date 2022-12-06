@@ -32,3 +32,7 @@ output "nlb_smb" {
   description = "SMB UNC path for the Qumulo NLB"
   value       = "\\${aws_lb.int_nlb.dns_name}\\<SMB Share Name>"
 }
+output "nlb_dns" {
+  description = "DNS name for the Qumulo NLB"
+  value       = "${aws_lb.int_nlb.dns_name}"
+}

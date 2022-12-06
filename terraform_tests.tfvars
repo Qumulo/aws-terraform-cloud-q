@@ -62,7 +62,7 @@ q_nodes_per_az = 1
 
 # ****************************** Optional **************************************************************
 # ***** Environment and Tag Options *****
-# dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
+# dev_environment                   - Set to true to enable the use of m5.xlarge instance types and make the cluster NLB be public.  NOT recommended for production.
 # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
 #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
 #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
@@ -105,10 +105,12 @@ q_route53_provision = false
 #                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
 # q_nlb_provision                   - true/false to enable deployment of the NLB.  If the qconfig module senses multi-AZ it will deploy the NLB in the same subnets as the cluster
 # q_nlb_stickiness                  - true/false to enable sticky sessions
-q_nlb_cross_zone         = false
+# q_nlb_internal                    - true/false on whether the main nlb should be internal to the vpc or exposed to the internet.  Setting to false will only work if dev_environment is true.
+q_nlb_cross_zone         = true
 q_nlb_override_subnet_id = null
-q_nlb_provision          = false
+q_nlb_provision          = true
 q_nlb_stickiness         = true
+q_nlb_internal           = false
 
 # ***** OPTIONAL module 'nlb-management' *****
 # ----- Deploys an NLB in a public subnet for public management reachability.  Test environments only.  Not for production.

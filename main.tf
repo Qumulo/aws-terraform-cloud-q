@@ -288,11 +288,13 @@ module "nlb-qumulo" {
   dereg_delay            = 60
   dereg_term             = false
   node_count             = module.qconfig.node_count
-  preserve_ip            = true
+  preserve_ip            = !var.dev_environment || var.q_nlb_internal
   private_subnet_ids     = module.qconfig.nlb_subnet_ids
+  public_subnet_ids      = module.qconfig.public_subnet_ids
   proxy_proto_v2         = false
   random_alphanumeric    = random_string.alphanumeric.id
   stickiness             = var.q_nlb_stickiness
+  is_public              = var.dev_environment && !var.q_nlb_internal
   term_protection        = var.term_protection
 
   tags = var.tags

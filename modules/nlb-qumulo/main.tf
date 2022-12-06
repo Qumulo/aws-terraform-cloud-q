@@ -24,10 +24,10 @@ resource "aws_lb" "int_nlb" {
   name                             = "qumulo-int-${var.random_alphanumeric}"
   enable_cross_zone_load_balancing = var.cross_zone
   enable_deletion_protection       = var.term_protection
-  internal                         = true
+  internal                         = !var.is_public
   ip_address_type                  = "ipv4"
   load_balancer_type               = "network"
-  subnets                          = var.private_subnet_ids
+  subnets                          = var.is_public ? var.public_subnet_ids: var.private_subnet_ids
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}-Qumulo Cluster Internal NLB" })
 }
@@ -51,6 +51,23 @@ resource "aws_lb_target_group" "port_22" {
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
+resource "aws_lb_target_group_attachment" "port_22" {
+  count            = var.node_count
+  port             = 22
+  target_group_arn = aws_lb_target_group.port_22.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_22" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "22"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_22.arn
+  }
+}
+
 resource "aws_lb_target_group" "port_80" {
   name                   = "qumulo-int-80-${var.random_alphanumeric}"
   port                   = 80
@@ -68,6 +85,23 @@ resource "aws_lb_target_group" "port_80" {
   }
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+}
+
+resource "aws_lb_target_group_attachment" "port_80" {
+  count            = var.node_count
+  port             = 80
+  target_group_arn = aws_lb_target_group.port_80.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_80" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "80"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_80.arn
+  }
 }
 
 resource "aws_lb_target_group" "port_111" {
@@ -89,6 +123,23 @@ resource "aws_lb_target_group" "port_111" {
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
+resource "aws_lb_target_group_attachment" "port_111" {
+  count            = var.node_count
+  port             = 111
+  target_group_arn = aws_lb_target_group.port_111.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_111" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "111"
+  protocol          = "TCP_UDP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_111.arn
+  }
+}
+
 resource "aws_lb_target_group" "port_443" {
   name                   = "qumulo-int-443-${var.random_alphanumeric}"
   port                   = 443
@@ -106,6 +157,23 @@ resource "aws_lb_target_group" "port_443" {
   }
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+}
+
+resource "aws_lb_target_group_attachment" "port_443" {
+  count            = var.node_count
+  port             = 443
+  target_group_arn = aws_lb_target_group.port_443.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_443" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "443"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_443.arn
+  }
 }
 
 resource "aws_lb_target_group" "port_445" {
@@ -127,6 +195,23 @@ resource "aws_lb_target_group" "port_445" {
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
+resource "aws_lb_target_group_attachment" "port_445" {
+  count            = var.node_count
+  port             = 445
+  target_group_arn = aws_lb_target_group.port_445.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_445" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "445"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_445.arn
+  }
+}
+
 resource "aws_lb_target_group" "port_2049" {
   name                   = "qumulo-int-2049-${var.random_alphanumeric}"
   port                   = 2049
@@ -146,6 +231,24 @@ resource "aws_lb_target_group" "port_2049" {
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
+resource "aws_lb_target_group_attachment" "port_2049" {
+  count            = var.node_count
+  port             = 2049
+  target_group_arn = aws_lb_target_group.port_2049.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_2049" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "2049"
+  protocol          = "TCP_UDP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_2049.arn
+  }
+}
+
+
 resource "aws_lb_target_group" "port_3712" {
   name                   = "qumulo-int-3712-${var.random_alphanumeric}"
   port                   = 3712
@@ -163,6 +266,23 @@ resource "aws_lb_target_group" "port_3712" {
   }
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+}
+
+resource "aws_lb_target_group_attachment" "port_3712" {
+  count            = var.node_count
+  port             = 3712
+  target_group_arn = aws_lb_target_group.port_3712.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_3712" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "3712"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_3712.arn
+  }
 }
 
 resource "aws_lb_target_group" "port_8000" {
@@ -184,130 +304,11 @@ resource "aws_lb_target_group" "port_8000" {
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
 }
 
-resource "aws_lb_target_group_attachment" "port_22" {
-  count            = var.node_count
-  port             = 22
-  target_group_arn = aws_lb_target_group.port_22.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_80" {
-  count            = var.node_count
-  port             = 80
-  target_group_arn = aws_lb_target_group.port_80.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_111" {
-  count            = var.node_count
-  port             = 111
-  target_group_arn = aws_lb_target_group.port_111.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_443" {
-  count            = var.node_count
-  port             = 443
-  target_group_arn = aws_lb_target_group.port_443.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_445" {
-  count            = var.node_count
-  port             = 445
-  target_group_arn = aws_lb_target_group.port_445.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_2049" {
-  count            = var.node_count
-  port             = 2049
-  target_group_arn = aws_lb_target_group.port_2049.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_target_group_attachment" "port_3712" {
-  count            = var.node_count
-  port             = 3712
-  target_group_arn = aws_lb_target_group.port_3712.arn
-  target_id        = var.cluster_primary_ips[count.index]
-}
-
 resource "aws_alb_target_group_attachment" "port_8000" {
   count            = var.node_count
   port             = 8000
   target_group_arn = aws_lb_target_group.port_8000.arn
   target_id        = var.cluster_primary_ips[count.index]
-}
-
-resource "aws_lb_listener" "port_22" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "22"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_22.arn
-  }
-}
-
-resource "aws_lb_listener" "port_80" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "80"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_80.arn
-  }
-}
-
-resource "aws_lb_listener" "port_111" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "111"
-  protocol          = "TCP_UDP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_111.arn
-  }
-}
-
-resource "aws_lb_listener" "port_443" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "443"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_443.arn
-  }
-}
-
-resource "aws_lb_listener" "port_445" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "445"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_445.arn
-  }
-}
-
-resource "aws_lb_listener" "port_2049" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "2049"
-  protocol          = "TCP_UDP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_2049.arn
-  }
-}
-
-resource "aws_lb_listener" "port_3712" {
-  load_balancer_arn = aws_lb.int_nlb.arn
-  port              = "3712"
-  protocol          = "TCP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.port_3712.arn
-  }
 }
 
 resource "aws_lb_listener" "port_8000" {

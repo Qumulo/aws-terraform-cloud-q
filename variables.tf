@@ -304,6 +304,11 @@ variable "q_nlb_provision" {
   type        = bool
   default     = false
 }
+variable "q_nlb_internal" {
+  description = "OPTIONAL: Makes the NLB for the cluster internal, setting this to false will allow anyone to reach the cluster. Will only work in a dev environment."
+  type        = bool
+  default     = true
+}
 variable "q_nlb_stickiness" {
   description = "OPTIONAL: AWS NLB sticky sessions"
   type        = bool

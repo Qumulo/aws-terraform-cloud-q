@@ -62,6 +62,10 @@ output "qumulo_public_url" {
   description = "Link to public IP for Qumulo Cluster"
   value       = var.q_public_mgmt_provision ? module.nlb-management[0].url : null
 }
+output "qumulo_nlb_dns" {
+  description = "The DNS name of the NLB, if provisioned"
+  value = var.q_nlb_provision ? module.nlb-qumulo[0].nlb_dns : null
+}
 
 #Uncomment any of the submodule outputs below to get all outputs for a given submodule
 #None of these outputs should be necessary for production environments
