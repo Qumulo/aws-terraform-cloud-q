@@ -26,6 +26,7 @@ import unittest
 import uuid
 
 from qumulo.rest_client import RestClient
+from retry import retry
 
 from tests.utils import TerraformExecutor, TerraformLogLevel
 
@@ -113,6 +114,7 @@ class BaseClusterTests(ABC, unittest.TestCase):
     def create_qumulo_terraform_executor(cls) -> TerraformExecutor:
         ...
 
+    @retry(TimeoutError, delay=1, tries=180)
     def assert_cluster_configuration(self, host: str, password: str):
         rest_client = RestClient(address=host, port=8000)
         rest_client.login(username="admin", password=password)
