@@ -27,7 +27,7 @@ resource "aws_lb" "int_nlb" {
   internal                         = !var.is_public
   ip_address_type                  = "ipv4"
   load_balancer_type               = "network"
-  subnets                          = var.is_public ? var.public_subnet_ids: var.private_subnet_ids
+  subnets                          = var.private_subnet_ids
 
   tags = merge(var.tags, { Name = "${var.deployment_unique_name}-Qumulo Cluster Internal NLB" })
 }

@@ -108,7 +108,7 @@ q_route53_provision = false
 # q_nlb_internal                    - true/false on whether the main nlb should be internal to the vpc or exposed to the internet.  Setting to false will only work if dev_environment is true.
 q_nlb_cross_zone         = true
 q_nlb_override_subnet_id = null
-q_nlb_provision          = true
+q_nlb_provision          = false
 q_nlb_stickiness         = true
 q_nlb_internal           = false
 
