@@ -23,3 +23,9 @@ pip3 install -r requirements.txt
 ```
 AWS_ACCESS_KEY_ID=<insert key here> AWS_SECRET_ACCESS_KEY=<insert key here> python -m pytest tests/ -s
 ```
+
+### Code linter
+
+```
+black -t py39 .
+```
