@@ -26,6 +26,7 @@ import unittest
 import uuid
 
 from qumulo.rest_client import RestClient
+import requests
 from retry import retry
 
 from tests.utils import TerraformExecutor, TerraformLogLevel
@@ -136,6 +137,16 @@ class BaseClusterTests(ABC, unittest.TestCase):
             host=self.qumulo_executor_outputs["qumulo_nlb_dns"],
             password=self.CLUSTER_PASSWORD,
         )
+
+    def test_http_ui(self):
+        @retry(requests.exceptions.Timeout, delay=1, tries=180)
+        def fetch_ui() -> requests.Response:
+            return requests.get(
+                f'{self.qumulo_executor_outputs["qumulo_private_url"]}/version',
+                verify=False,
+            )
+
+        self.assertIsNotNone(fetch_ui().json().get("revision_id"))
 
 
 class TestSingleAZ(BaseClusterTests):
