@@ -148,6 +148,11 @@ class BaseClusterTests(ABC, unittest.TestCase):
 
         self.assertIsNotNone(fetch_ui().json().get("revision_id"))
 
+    def test_terraform_outputs(self):
+        self.assertEqual(
+            "Success", self.qumulo_executor_outputs["qumulo_cluster_provisioned"]
+        )
+
 
 class TestSingleAZ(BaseClusterTests):
     __test__ = True
