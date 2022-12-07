@@ -11,9 +11,9 @@ s3_bucket_region = "us-west-2"
 # aws_region                        - Region for the deployment of the cluster
 # ec2_keypair                       - EC2 key pair within the region
 # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
-aws_region        = "us-west-2"
-ec2_key_pair      = "aws-terraform-cloud-q-ec2-key-pair-3a032030-cb5e-4c3a-a80c-10773a9a65ae"
-term_protection   = false
+aws_region      = "us-west-2"
+ec2_key_pair    = "aws-terraform-cloud-q-ec2-key-pair-3a032030-cb5e-4c3a-a80c-10773a9a65ae"
+term_protection = false
 
 # ***** Qumulo Cluster Variables *****
 # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
@@ -118,5 +118,5 @@ q_nlb_internal           = false
 # q_public_mgmt_provision           - true/false to enable deployment of the management NLB
 # q_public_replication_provision    - true/false to enable Qumulo replication port
 public_subnet_id               = null
-q_public_mgmt_provision        = false
+q_public_mgmt_provision        = true
 q_public_replication_provision = true
