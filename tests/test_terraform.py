@@ -25,7 +25,6 @@ from typing import Dict
 import unittest
 import uuid
 
-from qumulo.rest_client import RestClient
 import requests
 from retry import retry
 
@@ -115,34 +114,13 @@ class BaseClusterTests(ABC, unittest.TestCase):
     def create_qumulo_terraform_executor(cls) -> TerraformExecutor:
         ...
 
-    @retry(TimeoutError, delay=1, tries=180)
-    def assert_cluster_configuration(self, host: str, password: str):
-        rest_client = RestClient(address=host, port=8000)
-        rest_client.login(username="admin", password=password)
-        version = rest_client.version.version()
-
-        self.assertIsNotNone(version["revision_id"])
-        self.assertEqual("release", version["flavor"])
-
-        nodes = rest_client.cluster.list_nodes()
-
-        self.assertEqual(self.QUMULO_CLUSTER_NODES, len(nodes))
-        for node in nodes:
-            self.assertEqual("online", node["node_status"])
-
     # TEST CASES
-
-    def test_min_path(self):
-        self.assert_cluster_configuration(
-            host=self.qumulo_executor_outputs["qumulo_nlb_dns"],
-            password=self.CLUSTER_PASSWORD,
-        )
 
     def test_http_ui(self):
         @retry(requests.exceptions.Timeout, delay=1, tries=180)
         def fetch_ui() -> requests.Response:
             return requests.get(
-                f'{self.qumulo_executor_outputs["qumulo_private_url"]}/version',
+                f'{self.qumulo_executor_outputs["qumulo_public_url"]}/version',
                 verify=False,
             )
 
