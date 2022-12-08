@@ -126,6 +126,11 @@ class BaseClusterTests(ABC, unittest.TestCase):
 
         self.assertIsNotNone(fetch_ui().json().get("revision_id"))
 
+    def test_terraform_outputs(self):
+        self.assertEqual(
+            "Success", self.qumulo_executor_outputs["qumulo_cluster_provisioned"]
+        )
+
 
 class TestSingleAZ(BaseClusterTests):
     __test__ = True
@@ -137,7 +142,7 @@ class TestSingleAZ(BaseClusterTests):
             terraform_workspace="test",
             terraform_vars_file="terraform_tests.tfvars",
             terraform_vars={
-                "deployment_name": f"cloud-q-test-single-az-{uuid.uuid4()}"[:32],
+                "deployment_name": "cloud-q-test-single-az",
                 "aws_vpc_id": cls.vpc_executor_outputs["vpc_id"],
                 "private_subnet_id": cls.vpc_executor_outputs["private_subnet_ids"][0],
                 "public_subnet_id": cls.vpc_executor_outputs["public_subnet_ids"][0],
@@ -159,7 +164,7 @@ class TestMultiAZ(BaseClusterTests):
             terraform_workspace="test",
             terraform_vars_file="terraform_tests.tfvars",
             terraform_vars={
-                "deployment_name": f"cloud-q-test-multi-az-{uuid.uuid4()}"[:32],
+                "deployment_name": "cloud-q-test-multi-az",
                 "aws_vpc_id": cls.vpc_executor_outputs["vpc_id"],
                 "private_subnet_id": ",".join(
                     cls.vpc_executor_outputs["private_subnet_ids"]
