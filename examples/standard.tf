@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.6"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.7"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
