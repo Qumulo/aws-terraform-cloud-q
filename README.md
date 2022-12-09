@@ -403,4 +403,6 @@ All other trademarks referenced herein are the property of their respective owne
 - [Dack Busch](https://github.com/dackbusch) - Co-creator
 - [Gokul Kupparaj](https://github.com/gokulku) - Co-creator
 - [Wesley Kirkland](https://github.com/wesleykirklandsg) - Added Terraform automatic documentation
+- [Travis Cunningham](https://github.com/travcunn)
+
 <!-- END_TF_DOCS -->
