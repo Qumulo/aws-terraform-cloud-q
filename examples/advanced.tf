@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.7"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -69,12 +69,14 @@ module "qumulo_cloud_q" {
   q_nodes_per_az = 0
   # ****************************** Optional **************************************************************
   # ***** Environment and Tag Options *****
+  # check_provisioner_shutdown        - Default is true.  Launches a local-exec script on the Terraform machine to validate the completion of secondary provisioning of the cluster.
   # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
   # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
   #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
   #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-  dev_environment = false
-  tags            = null
+  check_provisioner_shutdown = true
+  dev_environment            = false
+  tags                       = null
   # ***** Qumulo Cluster Misc Options *****
   # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default EBS KMS key will be used.
   # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs

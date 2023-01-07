@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
 [![Qumulo Logo](https://qumulo.com/wp-content/uploads/2021/06/CloudQ-Logo_OnLight.png)](http://qumulo.com)
 
-# aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases) ![Test Workflow Status](https://github.com/Qumulo/aws-terraform-cloud-q/actions/workflows/tests.yaml/badge.svg)
+# aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases)
 
 Comprehensive Terraform to deploy a Qumulo cluster with 4 to 20 instances per the AWS Well Architected Framework.
 Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
@@ -83,7 +83,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.7"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -120,7 +120,7 @@ module "qumulo_cloud_q" {
   q_marketplace_type       = "1TB-Usable-All-Flash"
   # ***** Qumulo Sidecar Variables *****
   # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version post deployment.
-  q_sidecar_version           = "5.1.0.1"
+  q_sidecar_version = "5.1.0.1"
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
   # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
@@ -128,14 +128,14 @@ module "qumulo_cloud_q" {
   #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
   #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
   # q_node_count                      - Total # of EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
-  q_disk_config  = null
-  q_node_count   = 0
+  q_disk_config = null
+  q_node_count  = 0
   # ****************************** Optional **************************************************************
   # ***** Environment and Tag Options *****
   # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
   #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
   #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-  tags            = null  
+  tags = null
 }
 
 output "outputs_qumulo_cloud_q" {
@@ -147,7 +147,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.7"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -217,12 +217,14 @@ module "qumulo_cloud_q" {
   q_nodes_per_az = 0
   # ****************************** Optional **************************************************************
   # ***** Environment and Tag Options *****
+  # check_provisioner_shutdown        - Default is true.  Launches a local-exec script on the Terraform machine to validate the completion of secondary provisioning of the cluster.
   # dev_environment                   - Set to true to enable the use of m5.xlarge instance types.  NOT recommended for production.
   # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
   #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
   #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-  dev_environment = false
-  tags            = null
+  check_provisioner_shutdown = true
+  dev_environment            = false
+  tags                       = null
   # ***** Qumulo Cluster Misc Options *****
   # kms_key_id                        - Specify a KMS Customer Managed Key ID for EBS Volume Encryption. Otherwise an AWS default EBS KMS key will be used.
   # q_audit_logging                   - Set true to enable audit logging to CloudWatch logs
@@ -311,6 +313,7 @@ This repo is self documenting via Terraform-Docs.
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | n/a | yes |
 | <a name="input_aws_vpc_id"></a> [aws\_vpc\_id](#input\_aws\_vpc\_id) | AWS VPC identifier | `string` | n/a | yes |
+| <a name="input_check_provisioner_shutdown"></a> [check\_provisioner\_shutdown](#input\_check\_provisioner\_shutdown) | Executes a local-exec script on the Terraform machine to check if the provisioner instance shutdown which indicates a successful cluster deployment. | `bool` | `true` | no |
 | <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | Name for this Terraform deployment.  This name plus 11 random hex digits will be used for all resource names where appropriate. | `string` | n/a | yes |
 | <a name="input_dev_environment"></a> [dev\_environment](#input\_dev\_environment) | Enables the use of m5.xlarge instance type.  NOT recommended for production and overridden when not a development environment. | `bool` | `false` | no |
 | <a name="input_ec2_key_pair"></a> [ec2\_key\_pair](#input\_ec2\_key\_pair) | AWS EC2 key pair | `string` | n/a | yes |
@@ -335,7 +338,6 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
 | <a name="input_q_nlb_cross_zone"></a> [q\_nlb\_cross\_zone](#input\_q\_nlb\_cross\_zone) | OPTIONAL: AWS NLB Enable cross-AZ load balancing | `bool` | `false` | no |
-| <a name="input_q_nlb_internal"></a> [q\_nlb\_internal](#input\_q\_nlb\_internal) | OPTIONAL: Makes the NLB for the cluster internal, setting this to false will allow anyone to reach the cluster. Will only work in a dev environment. | `bool` | `true` | no |
 | <a name="input_q_nlb_override_subnet_id"></a> [q\_nlb\_override\_subnet\_id](#input\_q\_nlb\_override\_subnet\_id) | OPTIONAL: Private Subnet ID for NLB if deploying in subnet(s) other than subnet(s) the cluster is deployed in | `string` | `null` | no |
 | <a name="input_q_nlb_provision"></a> [q\_nlb\_provision](#input\_q\_nlb\_provision) | OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for load balancing and client failover | `bool` | `false` | no |
 | <a name="input_q_nlb_stickiness"></a> [q\_nlb\_stickiness](#input\_q\_nlb\_stickiness) | OPTIONAL: AWS NLB sticky sessions | `bool` | `true` | no |
@@ -365,7 +367,6 @@ This repo is self documenting via Terraform-Docs.
 | <a name="output_qumulo_cluster_provisioned"></a> [qumulo\_cluster\_provisioned](#output\_qumulo\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records. |
 | <a name="output_qumulo_knowledge_base"></a> [qumulo\_knowledge\_base](#output\_qumulo\_knowledge\_base) | Qumulo knowledge base |
-| <a name="output_qumulo_nlb_dns"></a> [qumulo\_nlb\_dns](#output\_qumulo\_nlb\_dns) | The DNS name of the NLB, if provisioned |
 | <a name="output_qumulo_private_NFS"></a> [qumulo\_private\_NFS](#output\_qumulo\_private\_NFS) | Private NFS path for the Qumulo cluster |
 | <a name="output_qumulo_private_SMB"></a> [qumulo\_private\_SMB](#output\_qumulo\_private\_SMB) | Private SMB UNC path for the Qumulo cluster |
 | <a name="output_qumulo_private_url"></a> [qumulo\_private\_url](#output\_qumulo\_private\_url) | Private URL for the Qumulo cluster |
@@ -401,5 +402,4 @@ All other trademarks referenced herein are the property of their respective owne
 - [Dack Busch](https://github.com/dackbusch) - Co-creator
 - [Gokul Kupparaj](https://github.com/gokulku) - Co-creator
 - [Wesley Kirkland](https://github.com/wesleykirklandsg) - Added Terraform automatic documentation
-- [Travis Cunningham](https://github.com/travcunn) - Added automated tests
 <!-- END_TF_DOCS -->

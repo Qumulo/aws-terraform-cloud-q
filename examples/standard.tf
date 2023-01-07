@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.7"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -36,7 +36,7 @@ module "qumulo_cloud_q" {
   q_marketplace_type       = "1TB-Usable-All-Flash"
   # ***** Qumulo Sidecar Variables *****
   # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version post deployment.
-  q_sidecar_version           = "5.1.0.1"
+  q_sidecar_version = "5.1.0.1"
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
   # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
@@ -44,14 +44,14 @@ module "qumulo_cloud_q" {
   #                                       5TB-Hybrid-st1, 8TiB-Hybrid-st1, 13TiB-Hybrid-st1, 20TB-Hybrid-st1, 35TiB-Hybrid-st1, 55TiB-Hybrid-st1, 90TiB-Hybrid-st1, 160TiB-Hybrid-st1, 256TiB-Hybrid-st1, 320TiB-Hybrid-st1
   #                                       8TiB-Hybrid-sc1, 13TiB-Hybrid-sc1, 20TB-Hybrid-sc1, 35TiB-Hybrid-sc1, 55TiB-Hybrid-sc1, 90TiB-Hybrid-sc1, 160TiB-Hybrid-sc1, 256TiB-Hybrid-sc1, 320TiB-Hybrid-sc1
   # q_node_count                      - Total # of EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
-  q_disk_config  = null
-  q_node_count   = 0
+  q_disk_config = null
+  q_node_count  = 0
   # ****************************** Optional **************************************************************
   # ***** Environment and Tag Options *****
   # tags                              - Additional tags to add to all created resources.  Often used for billing, departmental tracking, chargeback, etc.
   #                                     If you add an additional tag with the key 'Name' it will be ignored.  All infrastructure is tagged with the 'Name=deployment_unique_name'.
   #                                        Example: tags = { "key1" = "value1", "key2" = "value2" }
-  tags            = null  
+  tags = null
 }
 
 output "outputs_qumulo_cloud_q" {

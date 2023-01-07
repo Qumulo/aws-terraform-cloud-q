@@ -321,6 +321,7 @@ resource "aws_instance" "provisioner" {
 
 #This resource monitors the status of the qprovisioner module (EC2 Instance) that executes secondary provisioning of the Qumulo cluster.
 #It pulls status from SSM Parameter Store where the provisioner writest status/state.
+
 locals {
   is_windows  = substr(pathexpand("~"), 0, 1) == "/" ? false : true
   status_sh   = "${var.scripts_path}status.sh"
@@ -329,12 +330,16 @@ locals {
 }
 
 data "aws_ssm_parameter" "qprovisioner" {
+  count = var.check_provisioner_shutdown ? 1 : 0
+
   name = "/qumulo/${var.deployment_unique_name}/last-run-status"
 
   depends_on = [null_resource.provisioner_status]
 }
 
 resource "null_resource" "provisioner_status" {
+  count = var.check_provisioner_shutdown ? 1 : 0
+
   provisioner "local-exec" {
     interpreter = local.is_windows ? ["PowerShell", "-Command"] : []
     command     = local.is_windows ? templatefile(local.status_ps1, local.status_vars) : templatefile(local.status_sh, local.status_vars)

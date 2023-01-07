@@ -22,5 +22,5 @@
 
 output "status" {
   description = "If the provisioner instance completed secondary provisioning of the cluster = Success/Failure"
-  value       = nonsensitive(data.aws_ssm_parameter.qprovisioner.value) == "Shutting down provisioning instance" ? "Success" : "FAILURE"
+  value       = var.check_provisioner_shutdown ? nonsensitive(data.aws_ssm_parameter.qprovisioner[0].value) == "Shutting down provisioning instance" ? "Success" : "FAILURE" : "Validate secondary provisioning of the cluster completed.  Verify EC2 Instance ID ${aws_instance.provisioner.id} auto shutdown or check Parameter Store ${aws_ssm_parameter.last-run-status.arn}"
 }

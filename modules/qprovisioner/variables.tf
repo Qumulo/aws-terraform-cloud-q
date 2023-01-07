@@ -40,6 +40,10 @@ variable "aws_vpc_id" {
   description = "AWS VPC identifier"
   type        = string
 }
+variable "check_provisioner_shutdown" {
+  description = "Executes a local-exec script on the Terraform machine to check if the provisioner instance shutdown which indicates a successful cluster deployment."
+  type        = bool
+}
 variable "cluster_floating_ips" {
   description = "List of all floating IPs for the Qumulo cluster"
   type        = list(string)

@@ -34,6 +34,11 @@ variable "aws_vpc_id" {
     error_message = "The aws_vpc_id must be a valid VPC ID of the form 'vpc-'."
   }
 }
+variable "check_provisioner_shutdown" {
+  description = "Executes a local-exec script on the Terraform machine to check if the provisioner instance shutdown which indicates a successful cluster deployment."
+  type        = bool
+  default     = true
+}
 variable "deployment_name" {
   description = "Name for this Terraform deployment.  This name plus 11 random hex digits will be used for all resource names where appropriate."
   type        = string
@@ -303,11 +308,6 @@ variable "q_nlb_provision" {
   description = "OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for load balancing and client failover"
   type        = bool
   default     = false
-}
-variable "q_nlb_internal" {
-  description = "OPTIONAL: Makes the NLB for the cluster internal, setting this to false will allow anyone to reach the cluster. Will only work in a dev environment."
-  type        = bool
-  default     = true
 }
 variable "q_nlb_stickiness" {
   description = "OPTIONAL: AWS NLB sticky sessions"

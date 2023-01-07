@@ -20,7 +20,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
-# **** Version 4.6 ****
+# **** Version 4.8 ****
 
 data "aws_caller_identity" "current" {}
 
@@ -185,6 +185,7 @@ module "qprovisioner" {
   aws_partition              = data.aws_partition.current.partition
   aws_region                 = var.aws_region
   aws_vpc_id                 = var.aws_vpc_id
+  check_provisioner_shutdown = var.check_provisioner_shutdown
   cluster_floating_ips       = module.qcluster.floating_ips
   cluster_instance_ids       = module.qcluster.instance_ids
   cluster_max_nodes_down     = module.qconfig.max_nodes_down
@@ -293,7 +294,6 @@ module "nlb-qumulo" {
   proxy_proto_v2         = false
   random_alphanumeric    = random_string.alphanumeric.id
   stickiness             = var.q_nlb_stickiness
-  is_public              = var.dev_environment && !var.q_nlb_internal
   term_protection        = var.term_protection
 
   tags = var.tags
