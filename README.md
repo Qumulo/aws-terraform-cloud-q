@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
 [![Qumulo Logo](https://qumulo.com/wp-content/uploads/2021/06/CloudQ-Logo_OnLight.png)](http://qumulo.com)
 
-# aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases)
+# aws-terraform-cloud-q [![Latest Release](https://img.shields.io/github/release/qumulo/aws-terraform-cloud-q.svg)](https://github.com/qumulo/aws-terraform-cloud-q/releases) ![Test Workflow Status](https://github.com/Qumulo/aws-terraform-cloud-q/actions/workflows/tests.yaml/badge.svg)
 
 Comprehensive Terraform to deploy a Qumulo cluster with 4 to 20 instances per the AWS Well Architected Framework.
 Supports usable capacities from 1TB to 6PB with all Qumulo Core features.
@@ -367,6 +367,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="output_qumulo_cluster_provisioned"></a> [qumulo\_cluster\_provisioned](#output\_qumulo\_cluster\_provisioned) | If the qprovisioner module completed secondary provisioning of the cluster = Success/Failure |
 | <a name="output_qumulo_floating_ips"></a> [qumulo\_floating\_ips](#output\_qumulo\_floating\_ips) | Qumulo floating IPs for IP failover & load distribution.  If using an alternate source for DNS, use these IPs for the A-records. |
 | <a name="output_qumulo_knowledge_base"></a> [qumulo\_knowledge\_base](#output\_qumulo\_knowledge\_base) | Qumulo knowledge base |
+| <a name="output_qumulo_nlb_dns"></a> [qumulo\_nlb\_dns](#output\_qumulo\_nlb\_dns) | The DNS name of the NLB, if provisioned |
 | <a name="output_qumulo_private_NFS"></a> [qumulo\_private\_NFS](#output\_qumulo\_private\_NFS) | Private NFS path for the Qumulo cluster |
 | <a name="output_qumulo_private_SMB"></a> [qumulo\_private\_SMB](#output\_qumulo\_private\_SMB) | Private SMB UNC path for the Qumulo cluster |
 | <a name="output_qumulo_private_url"></a> [qumulo\_private\_url](#output\_qumulo\_private\_url) | Private URL for the Qumulo cluster |
@@ -402,4 +403,5 @@ All other trademarks referenced herein are the property of their respective owne
 - [Dack Busch](https://github.com/dackbusch) - Co-creator
 - [Gokul Kupparaj](https://github.com/gokulku) - Co-creator
 - [Wesley Kirkland](https://github.com/wesleykirklandsg) - Added Terraform automatic documentation
+- [Travis Cunningham](https://github.com/travcunn) - Added automated tests
 <!-- END_TF_DOCS -->

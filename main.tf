@@ -294,6 +294,7 @@ module "nlb-qumulo" {
   proxy_proto_v2         = false
   random_alphanumeric    = random_string.alphanumeric.id
   stickiness             = var.q_nlb_stickiness
+  is_public              = var.dev_environment && !var.q_nlb_internal
   term_protection        = var.term_protection
 
   tags = var.tags
