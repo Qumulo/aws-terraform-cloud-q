@@ -20,6 +20,14 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
+## ASU vars
+variable "admin_role_arn" {
+  type        = string
+  description = "IAM ARN of Administrator role"
+}
+
+## end ASU vars
+
 variable "aws_region" {
   description = "AWS region"
   type        = string
