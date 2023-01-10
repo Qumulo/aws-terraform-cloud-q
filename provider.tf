@@ -28,11 +28,13 @@
 # More information can be found here:
 #   https://registry.terraform.io/providers/hashicorp/aws/latest/docs
 
-provider "aws" {
-  region = var.aws_region
-}
+## ASU: provider must be commented out because it cannot be overridden.
 
-provider "aws" {
-  alias  = "bucket"
-  region = var.s3_bucket_region
-}
+# provider "aws" {
+#   region = var.aws_region
+# }
+
+# provider "aws" {
+#   alias  = "bucket"
+#   region = var.s3_bucket_region
+# }

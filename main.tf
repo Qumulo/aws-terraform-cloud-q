@@ -203,7 +203,7 @@ module "qprovisioner" {
   flash_tput                 = module.qcluster.flash_tput
   flash_iops                 = module.qcluster.flash_iops
   functions_s3_prefix        = local.functions_s3_prefix
-  instance_type              = "m5.large"
+  instance_type              = "t3.medium"
   kms_key_id                 = var.kms_key_id
   permissions_boundary       = var.q_permissions_boundary
   private_subnet_id          = module.qconfig.private_subnet_id_per_node[0]
