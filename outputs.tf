@@ -64,7 +64,7 @@ output "qumulo_public_url" {
 }
 output "qumulo_nlb_dns" {
   description = "The DNS name of the NLB, if provisioned"
-  value = var.q_nlb_provision ? module.nlb-qumulo[0].nlb_dns : null
+  value       = var.q_nlb_provision ? module.nlb-qumulo[0].nlb_dns : null
 }
 
 #Uncomment any of the submodule outputs below to get all outputs for a given submodule
