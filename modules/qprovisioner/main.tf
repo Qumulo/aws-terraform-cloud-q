@@ -24,6 +24,10 @@ data "aws_iam_policy" "secrets" {
   arn = "arn:${var.aws_partition}:iam::aws:policy/SecretsManagerReadWrite"
 }
 
+data "aws_iam_policy" "ssmrole" {
+  arn = "arn:${var.aws_partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 data "aws_ami" "amzn2" {
   most_recent = true
   owners      = ["amazon"]
@@ -113,6 +117,11 @@ resource "aws_iam_instance_profile" "provisioner_access" {
 resource "aws_iam_role_policy_attachment" "secrets" {
   role       = aws_iam_role.provisioner_access.name
   policy_arn = data.aws_iam_policy.secrets.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ssmrole" {
+  role       = aws_iam_role.provisioner_access.name
+  policy_arn = data.aws_iam_policy.ssmrole.arn
 }
 
 resource "aws_iam_role_policy" "policy1" {

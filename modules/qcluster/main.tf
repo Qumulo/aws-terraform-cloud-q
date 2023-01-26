@@ -20,6 +20,10 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #SOFTWARE.
 
+data "aws_iam_policy" "ssmrole" {
+  arn = "arn:${var.aws_partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 locals {
   all_nodes = aws_instance.node.*
 
@@ -158,6 +162,11 @@ locals {
       protocol    = "udp"
     },
     {
+      port        = 9000
+      description = "Port for S3 protocol"
+      protocol    = "tcp"
+    },
+    {
       port        = 2049
       description = "UDP port for NFS"
       protocol    = "udp"
@@ -223,6 +232,11 @@ EOF
 resource "aws_iam_instance_profile" "q_access" {
   name = "${var.deployment_unique_name}-qumulo-cluster"
   role = aws_iam_role.q_access.name
+}
+
+resource "aws_iam_role_policy_attachment" "ssmrole" {
+  role       = aws_iam_role.q_access.name
+  policy_arn = data.aws_iam_policy.ssmrole.arn
 }
 
 resource "aws_iam_role_policy" "policy1" {
