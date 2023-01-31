@@ -320,3 +320,39 @@ resource "aws_lb_listener" "port_8000" {
     target_group_arn = aws_lb_target_group.port_8000.arn
   }
 }
+
+resource "aws_lb_target_group" "port_9000" {
+  name                   = "qumulo-int-9000-${var.random_alphanumeric}"
+  port                   = 9000
+  protocol               = "TCP"
+  target_type            = "ip"
+  connection_termination = var.dereg_term
+  deregistration_delay   = var.dereg_delay
+  preserve_client_ip     = var.preserve_ip
+  proxy_protocol_v2      = var.proxy_proto_v2
+  vpc_id                 = var.aws_vpc_id
+
+  stickiness {
+    enabled = var.stickiness
+    type    = "source_ip"
+  }
+
+  tags = merge(var.tags, { Name = "${var.deployment_unique_name}" })
+}
+
+resource "aws_alb_target_group_attachment" "port_9000" {
+  count            = var.node_count
+  port             = 9000
+  target_group_arn = aws_lb_target_group.port_9000.arn
+  target_id        = var.cluster_primary_ips[count.index]
+}
+
+resource "aws_lb_listener" "port_9000" {
+  load_balancer_arn = aws_lb.int_nlb.arn
+  port              = "9000"
+  protocol          = "TCP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.port_9000.arn
+  }
+}
