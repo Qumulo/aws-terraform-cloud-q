@@ -163,7 +163,7 @@ locals {
     },
     {
       port        = 9000
-      description = "Port for S3 protocol"
+      description = "TCP port for S3"
       protocol    = "tcp"
     },
     {
