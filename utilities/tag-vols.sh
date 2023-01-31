@@ -29,6 +29,9 @@
 #	ec2:describe-instances
 #	ec2:modify-volume
 #	ec2:create-tags
+#If you are creating resource group with this script, you require the following additional IAM permissions. 
+#   resource-groups:CreateGroup
+#   ec2:DescribeTags
 
 POSITIONAL=()
 
