@@ -83,7 +83,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.9"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -147,7 +147,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.8"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.9"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -284,8 +284,8 @@ For more information on Qumulo SHIFT, custom CloudWatch Dashboards, adding nodes
 
 |Documentation|Description|
 |-------------|-----------|
-|[Qumulo SHIFT: Copy from Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-from-s3.md)| Copy data from S3 with the Qumulo GUI/CLI/API. |
-|[Qumulo SHIFT: Copy to Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/shift-to-s3.md)| Copy data to S3 with the Qumulo GUI/CLI/API. |
+|[Qumulo SHIFT: Copy from Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/administrator-guide/moving-data/shift-from-s3.md)| Copy data from S3 with the Qumulo GUI/CLI/API. |
+|[Qumulo SHIFT: Copy to Amazon S3](https://github.com/Qumulo/docs/blob/gh-pages/administrator-guide/moving-data/shift-to-s3.md)| Copy data to S3 with the Qumulo GUI/CLI/API. |
 |[Terraform: Using the Custom CloudWatch Dashboard](./docs/tf-cloudwatch-dashboard.pdf)| Details on viewing the CloudWatch dashboard and resource groups that are created for the Qumulo cluster.|
 |[Terraform: Using Qumulo EC2 & EBS type change scripts](./docs/tf-using-qumulo-ec2-ebs-change-scripts.pdf)| Details on how to change EC2 instance types and EBS volume types in production. |
 |[Terraform: Supported Updates](./docs/tf-update-deployment.pdf)| Details on Terraform update options and examples, including adding instances (nodes) to the cluster and upgrading the Qumulo Sidecar.|
@@ -338,6 +338,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_local_zone_or_outposts"></a> [q\_local\_zone\_or\_outposts](#input\_q\_local\_zone\_or\_outposts) | Is the Qumulo cluster being deployed in a local zone or on Outposts? | `bool` | `false` | no |
 | <a name="input_q_marketplace_type"></a> [q\_marketplace\_type](#input\_q\_marketplace\_type) | Qumulo AWS marketplace type | `string` | n/a | yes |
 | <a name="input_q_nlb_cross_zone"></a> [q\_nlb\_cross\_zone](#input\_q\_nlb\_cross\_zone) | OPTIONAL: AWS NLB Enable cross-AZ load balancing | `bool` | `false` | no |
+| <a name="input_q_nlb_internal"></a> [q\_nlb\_internal](#input\_q\_nlb\_internal) | OPTIONAL: Makes the NLB for the cluster internal, setting this to false will allow anyone to reach the cluster. Will only work in a dev environment. | `bool` | `true` | no |
 | <a name="input_q_nlb_override_subnet_id"></a> [q\_nlb\_override\_subnet\_id](#input\_q\_nlb\_override\_subnet\_id) | OPTIONAL: Private Subnet ID for NLB if deploying in subnet(s) other than subnet(s) the cluster is deployed in | `string` | `null` | no |
 | <a name="input_q_nlb_provision"></a> [q\_nlb\_provision](#input\_q\_nlb\_provision) | OPTIONAL: Provision an AWS NLB in front of the Qumulo cluster for load balancing and client failover | `bool` | `false` | no |
 | <a name="input_q_nlb_stickiness"></a> [q\_nlb\_stickiness](#input\_q\_nlb\_stickiness) | OPTIONAL: AWS NLB sticky sessions | `bool` | `true` | no |
