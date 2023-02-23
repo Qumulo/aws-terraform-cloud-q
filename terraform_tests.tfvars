@@ -26,9 +26,9 @@ term_protection = false
 #                                       Custom-1TB-6PB or Specified-AMI-ID
 q_cluster_admin_password = "!MyPwd123"
 q_cluster_name           = "Cloud-Q"
-q_cluster_version        = "5.1.0.1"
-q_instance_type          = "m5.xlarge"
-q_marketplace_type       = "1TB-Usable-All-Flash"
+# q_cluster_version        = "5.1.0.1"
+q_instance_type    = "m5.xlarge"
+q_marketplace_type = "1TB-Usable-All-Flash"
 
 # ***** Qumulo Sidecar Variables *****
 # q_local_zone_or_outposts          - true if deploying the cluster in a local zone or on Outposts.
@@ -38,7 +38,7 @@ q_marketplace_type       = "1TB-Usable-All-Flash"
 q_local_zone_or_outposts    = false
 q_sidecar_private_subnet_id = null
 q_sidecar_provision         = false
-q_sidecar_version           = "5.1.0.1"
+# q_sidecar_version           = "5.3.0"
 
 # ****************************** Marketplace Type Selection Dependencies ******************************
 # ***** Qumulo Cluster Config Options *****

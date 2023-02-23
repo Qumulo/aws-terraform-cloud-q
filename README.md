@@ -120,7 +120,7 @@ module "qumulo_cloud_q" {
   q_marketplace_type       = "1TB-Usable-All-Flash"
   # ***** Qumulo Sidecar Variables *****
   # q_sidecar_version                 - The software verison for the sidecar must match the cluster.  This variable can be used to update the sidecar software version post deployment.
-  q_sidecar_version = "5.1.0.1"
+  q_sidecar_version = "5.3.0"
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
   # q_disk_config                     - Specify the disk config only if using Marketplace types of 'Custom-' or 'Specified-AMI-ID'  Valid disk configs are:
