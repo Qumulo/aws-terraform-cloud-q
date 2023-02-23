@@ -22,7 +22,7 @@ py==1.11.0
 pyparsing==3.0.9
 pytest==7.2.0
 pytest-cov==4.0.0
-qumulo-api==5.1.0.1
+qumulo-api==5.3.0
 requests==2.28.1
 retry==0.9.2
 tomli==2.0.1

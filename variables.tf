@@ -129,7 +129,7 @@ variable "q_cluster_name" {
 variable "q_cluster_version" {
   description = "Qumulo cluster software version"
   type        = string
-  default     = "5.1.0.1"
+  default     = "5.3.0"
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?))$", var.q_cluster_version))
     error_message = "The q_cluster_version 5.1.0.1 or greater. Examples: 5.1.0.1, 5.1.2, 5.3.10."
@@ -389,7 +389,7 @@ variable "q_sidecar_user_name" {
 variable "q_sidecar_version" {
   description = "Qumulo Sidecar software version"
   type        = string
-  default     = "5.1.0.1"
+  default     = "5.3.0"
   nullable    = false
   validation {
     condition     = can(regex("^((4\\.[2-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?)|([5-9][0-9]?\\.[0-3]\\.[0-9][0-9]?\\.?[0-9]?[0-9]?))$", var.q_sidecar_version))
