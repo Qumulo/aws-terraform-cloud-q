@@ -133,7 +133,7 @@ module "qconfig" {
 module "qami-id-lookup" {
   count = var.q_marketplace_type == "Specified-AMI-ID" ? 0 : 1
 
-  source = "./modules/qami-id-lookup-5.1.0.1"
+  source = "./modules/qami-id-lookup-5.3.0"
 
   aws_region             = var.aws_region
   marketplace_short_name = module.qconfig.marketplace_short_name
