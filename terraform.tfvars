@@ -1,15 +1,15 @@
 # ****************************** Required *************************************************************
 # ***** Terraform Variables *****
-# deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignoreed after that to prevent unintended resource distruction. 
+# deployment_name                   - Any <=32 character name for the deployment. Set on first apply.  Changes are ignored after that to prevent unintended resource destruction. 
 #                                   - All infrastructure will be tagged with the Deployment Name and a unique 11 digit alphanumeric suffix.
-deployment_name = "my-deployment-name"
+deployment_name = "test-trends2"
 
 # ***** S3 Bucket Variables *****
 # s3_bucket_name                    - S3 Bucket to place provisioning instance files in
 # s3_bucket_prefix                  - S3 prefix, a folder. A subfolder with the deployment name is created under the supplied prefix
 # s3_bucket_region                  - Region the S3 bucket is hosted in
-s3_bucket_name   = "my-bucket"
-s3_bucket_prefix = "my-prefix/"
+s3_bucket_name   = "dackss3-dev"
+s3_bucket_prefix = "tf-test/"
 s3_bucket_region = "us-west-2"
 
 # ***** AWS Variables *****
@@ -20,10 +20,11 @@ s3_bucket_region = "us-west-2"
 #                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
 # term_protection                   - true/false to enable EC2 termination protection.  This should be set to 'true' for production deployments.
 aws_region        = "us-west-2"
-aws_vpc_id        = "vpc-1234567890abcdefg"
-ec2_key_pair      = "my-keypair"
-private_subnet_id = "subnet-1234567890abcdefg"
-term_protection   = true
+aws_vpc_id        = "vpc-0a677474a97e272df"
+ec2_key_pair      = "drb-keypair-OR"
+private_subnet_id = "subnet-01d76eb8ccdc3f156"
+#private_subnet_id = "subnet-01d76eb8ccdc3f156, subnet-0edfe9c88d90d51af, subnet-0c8edd3974ebe65c2, subnet-0e2e94f42d42f23fe"
+term_protection = false
 
 # ***** Qumulo Cluster Variables *****
 # q_cluster_admin_password          - Minumum 8 characters and must include one each of: uppercase, lowercase, and a special character
@@ -34,9 +35,9 @@ term_protection   = true
 #                                       1TB-Usable-All-Flash or 103TB-Usable-All-Flash
 #                                       12TB-Usable-Hybrid-st1, 96TB-Usable-Hybrid-st1, 270TB-Usable-Hybrid-st1, or 809TB-Usable-Hybrid-st1
 #                                       Custom-1TB-6PB or Specified-AMI-ID
-q_cluster_admin_password = "!MyPwd123"
-q_cluster_name           = "Cloud-Q"
-q_cluster_version        = "5.3.0"
+q_cluster_admin_password = "!Admin123"
+q_cluster_name           = "Cloud-Q1"
+q_cluster_version        = "6.1.0"
 q_instance_type          = "m5.2xlarge"
 q_marketplace_type       = "1TB-Usable-All-Flash"
 
@@ -48,7 +49,7 @@ q_marketplace_type       = "1TB-Usable-All-Flash"
 q_local_zone_or_outposts    = false
 q_sidecar_private_subnet_id = null
 q_sidecar_provision         = false
-q_sidecar_version           = "5.3.0"
+q_sidecar_version           = "6.0.2"
 
 # ****************************** Marketplace Type Selection Dependencies ******************************
 # ***** Qumulo Cluster Config Options *****
@@ -62,12 +63,11 @@ q_sidecar_version           = "5.3.0"
 # q_flash_iops                      - Specify gp3 iops between 3000 to 16000.  Default is 3000.  Not applicable to gp2.
 # q_node_count                      - Single AZ only & ignored for multi-AZ.  Total # EC2 Instances in the cluster (4-20).  Specify if growing the cluster or using Marketplace types of 'Custom-' or 'Specified-AMI-ID'. 0 implies marketplace config lookup.
 # q_nodes_per_az                    - Multi AZ only & ignored for single AZ.  Must be specified for distributed multi-AZ deployments with 1, 2, or 3.
-q_ami_id       = null
 q_disk_config  = null
 q_flash_type   = "gp3"
 q_flash_tput   = 250
 q_flash_iops   = 3000
-q_node_count   = 0
+q_node_count   = 4
 q_nodes_per_az = 0
 
 # ****************************** Optional **************************************************************
@@ -117,7 +117,8 @@ q_route53_provision = false
 #                                       Note: Distributed multi-AZ deployments are only supported in regions with at least 4 AZs: us-west-2, us-east-1, and ap-northeast-2.
 # q_nlb_provision                   - true/false to enable deployment of the NLB.  If the qconfig module senses multi-AZ it will deploy the NLB in the same subnets as the cluster
 # q_nlb_stickiness                  - true/false to enable sticky sessions
-q_nlb_cross_zone         = false
+q_nlb_cross_zone = false
+#q_nlb_override_subnet_id = "subnet-01d76eb8ccdc3f156, subnet-0edfe9c88d90d51af, subnet-0c8edd3974ebe65c2, subnet-0e2e94f42d42f23fe"
 q_nlb_override_subnet_id = null
 q_nlb_provision          = false
 q_nlb_stickiness         = true
@@ -127,6 +128,8 @@ q_nlb_stickiness         = true
 # public_subnet_id                  - AWS public subnet ID(s), one for single AZ, 4 or more for multi-AZ as a comma delimited string
 # q_public_mgmt_provision           - true/false to enable deployment of the management NLB
 # q_public_replication_provision    - true/false to enable Qumulo replication port
-public_subnet_id               = null
+public_subnet_id = null
+#public_subnet_id               = "subnet-0ea3c05cdc15063c1, subnet-0a7436d3c35faf862, subnet-00fa1ddcc81ee0c06, subnet-0c3293eca7b7b8ac9"
+#public_subnet_id               = "subnet-0ea3c05cdc15063c1"
 q_public_mgmt_provision        = false
-q_public_replication_provision = true
+q_public_replication_provision = false

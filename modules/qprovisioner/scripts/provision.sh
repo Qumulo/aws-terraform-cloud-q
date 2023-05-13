@@ -223,7 +223,7 @@ if [ -n "$new_ver" ]; then
   done
 
   for n in ${!upver[@]}; do
-    sw_file="qumulo_upgrade_cloud_${upver[n]}.qimg"
+    sw_file="cloud_qumulo_core_${upver[n]}.qimg"
     f_path="s3://"$s3bkt"/"$upgrade_s3pfx$sw_file
     cd /usr/share/nginx/html
     if [ -e "$sw_file" ]; then
@@ -239,13 +239,13 @@ if [ -n "$new_ver" ]; then
       fi
     else
       ssmput "last-run-status" "$region" "$stkname" "Downloading $sw_file from Trends.qumulo.com"
-      wget "https://trends.qumulo.com/data/download/$sw_file?access_code=$software_password" --output-document=$sw_file --quiet
+      wget "https://trends.qumulo.com/data/download/public/${upver[n]}/$sw_file?access_code=$software_password" --output-document=$sw_file --quiet
     fi
     cd /root
 
     ssmput "last-run-status" "$region" "$stkname" "Upgrading unconfigured nodes to ${upver[n]}"
 
-    upgrade_url=http://$serverIP/qumulo_upgrade_cloud_${upver[n]}.qimg
+    upgrade_url=http://$serverIP/$sw_file
 
     chk=$(vercomp $cur_ver "4.1.4"; echo $?)
     chk1=$(vercomp $cur_ver "4.1.0.1"; echo $?)

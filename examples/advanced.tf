@@ -1,5 +1,5 @@
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.9"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v5.0"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -36,7 +36,7 @@ module "qumulo_cloud_q" {
   #                                       Custom-1TB-6PB or Specified-AMI-ID
   q_cluster_admin_password = "!MyPwd123"
   q_cluster_name           = "Cloud-Q"
-  q_cluster_version        = "5.3.1"
+  q_cluster_version        = "6.1.0"
   q_instance_type          = "m5.2xlarge"
   q_marketplace_type       = "1TB-Usable-All-Flash"
   # ***** Qumulo Sidecar Variables *****
@@ -47,7 +47,7 @@ module "qumulo_cloud_q" {
   q_local_zone_or_outposts    = false
   q_sidecar_private_subnet_id = null
   q_sidecar_provision         = true
-  q_sidecar_version           = "5.3.1"
+  q_sidecar_version           = "6.1.0"
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
   # q_ami_id                          - This ami-id is only used if 'q_marketplace_type' is set to 'Specified-AMI-ID' above

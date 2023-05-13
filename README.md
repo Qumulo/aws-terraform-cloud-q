@@ -83,7 +83,7 @@ Select between the minimalist **examples/standard.tf** or the fully featured **e
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.9"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v5.0"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -147,7 +147,7 @@ output "outputs_qumulo_cloud_q" {
 
 ```hcl
 module "qumulo_cloud_q" {
-  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v4.9"
+  source = "git::https://github.com/Qumulo/aws-terraform-cloud-q.git?ref=v5.0"
 
   # ****************************** Required *************************************************************
   # ***** Terraform Variables *****
@@ -184,7 +184,7 @@ module "qumulo_cloud_q" {
   #                                       Custom-1TB-6PB or Specified-AMI-ID
   q_cluster_admin_password = "!MyPwd123"
   q_cluster_name           = "Cloud-Q"
-  q_cluster_version        = "5.3.1"
+  q_cluster_version        = "6.1.0"
   q_instance_type          = "m5.2xlarge"
   q_marketplace_type       = "1TB-Usable-All-Flash"
   # ***** Qumulo Sidecar Variables *****
@@ -195,7 +195,7 @@ module "qumulo_cloud_q" {
   q_local_zone_or_outposts    = false
   q_sidecar_private_subnet_id = null
   q_sidecar_provision         = true
-  q_sidecar_version           = "5.3.1"
+  q_sidecar_version           = "6.1.0"
   # ****************************** Marketplace Type Selection Dependencies ******************************
   # ***** Qumulo Cluster Config Options *****
   # q_ami_id                          - This ami-id is only used if 'q_marketplace_type' is set to 'Specified-AMI-ID' above
@@ -326,7 +326,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_cluster_additional_sg_ids"></a> [q\_cluster\_additional\_sg\_ids](#input\_q\_cluster\_additional\_sg\_ids) | OPTIONAL: AWS additional security groups IDs for the Qumulo cluster | `string` | `null` | no |
 | <a name="input_q_cluster_admin_password"></a> [q\_cluster\_admin\_password](#input\_q\_cluster\_admin\_password) | Qumulo cluster admin password | `string` | n/a | yes |
 | <a name="input_q_cluster_name"></a> [q\_cluster\_name](#input\_q\_cluster\_name) | Qumulo cluster name | `string` | `"Cloud-Q"` | no |
-| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"5.1.0.1"` | no |
+| <a name="input_q_cluster_version"></a> [q\_cluster\_version](#input\_q\_cluster\_version) | Qumulo cluster software version | `string` | `"5.3.0"` | no |
 | <a name="input_q_disk_config"></a> [q\_disk\_config](#input\_q\_disk\_config) | OPTIONAL: Qumulo disk config | `string` | `null` | no |
 | <a name="input_q_flash_iops"></a> [q\_flash\_iops](#input\_q\_flash\_iops) | OPTIONAL: Specify the iops for gp3 | `number` | `3000` | no |
 | <a name="input_q_flash_tput"></a> [q\_flash\_tput](#input\_q\_flash\_tput) | OPTIONAL: Specify the throughput, in MB/s, for gp3 | `number` | `250` | no |
@@ -353,7 +353,7 @@ This repo is self documenting via Terraform-Docs.
 | <a name="input_q_sidecar_private_subnet_id"></a> [q\_sidecar\_private\_subnet\_id](#input\_q\_sidecar\_private\_subnet\_id) | OPTIONAL: Private Subnet ID for Sidecar Lambdas if the cluster is being deployed in a local zone or on Outpost | `string` | `null` | no |
 | <a name="input_q_sidecar_provision"></a> [q\_sidecar\_provision](#input\_q\_sidecar\_provision) | Provision Qumulo Sidecar | `bool` | `true` | no |
 | <a name="input_q_sidecar_user_name"></a> [q\_sidecar\_user\_name](#input\_q\_sidecar\_user\_name) | Qumulo Sidecar username | `string` | `"SideCarUser"` | no |
-| <a name="input_q_sidecar_version"></a> [q\_sidecar\_version](#input\_q\_sidecar\_version) | Qumulo Sidecar software version | `string` | `"5.1.0.1"` | no |
+| <a name="input_q_sidecar_version"></a> [q\_sidecar\_version](#input\_q\_sidecar\_version) | Qumulo Sidecar software version | `string` | `"5.3.0"` | no |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | AWS S3 bucket name | `string` | n/a | yes |
 | <a name="input_s3_bucket_prefix"></a> [s3\_bucket\_prefix](#input\_s3\_bucket\_prefix) | AWS S3 bucket prefix (path).  Include a trailing slash (/) | `string` | n/a | yes |
 | <a name="input_s3_bucket_region"></a> [s3\_bucket\_region](#input\_s3\_bucket\_region) | AWS region the S3 bucket is hosted in | `string` | n/a | yes |
