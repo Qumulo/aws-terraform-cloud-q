@@ -105,7 +105,7 @@ else
 fi
 
 if [ -z "$iNewType" ]; then
-	echo "	MISSING Parameter: New Instance Type is required: m5.[xlarge-24xlarge], c5n.[4xlarge-18xlarge]"
+	echo "	MISSING Parameter: New Instance Type is required: m5.[xlarge-24xlarge], m6i.[xlarge-32xlarge], c5n.[4xlarge-18xlarge]"
 	fail="true"
 else
 	echo "	*New Instance Type = $iNewType"
@@ -151,6 +151,30 @@ case $iNewType in
  		echo "	--New instance type $iNewType confirmed"
  		;;
  	m5.24xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+    m6i.xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+	m6i.2xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+ 	m6i.4xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+ 	m6i.8xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+ 	m6i.12xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+ 	m6i.16xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+ 	m6i.24xlarge)
+ 		echo "	--New instance type $iNewType confirmed"
+ 		;;
+    m6i.32xlarge)
  		echo "	--New instance type $iNewType confirmed"
  		;;
  	c5n.4xlarge)
@@ -460,4 +484,3 @@ if [ $stopped = 0 ]; then
 else
 	echo "  ******* ${#instanceIDs[@]} Instances changed to $iNewType.  Cluster remains stopped."		
 fi
-
