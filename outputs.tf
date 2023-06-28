@@ -36,12 +36,10 @@ output "qumulo_knowledge_base" {
   description = "Qumulo knowledge base"
   value       = "https://care.qumulo.com/hc/en-us/categories/115000637447-KNOWLEDGE-BASE"
 }
-/*
 output "qumulo_primary_ips" {
   description = "Qumulo primary IPs."
   value       = module.qcluster.primary_ips
 }
-*/
 output "qumulo_private_NFS" {
   description = "Private NFS path for the Qumulo cluster"
   value       = var.q_route53_provision && !module.qconfig.multi_az && !var.q_nlb_provision ? module.route53-phz[0].nfs : (module.qconfig.multi_az || var.q_nlb_provision ? module.nlb-qumulo[0].nlb_nfs : "<custom.dns>:/<NFS Export Name>")
