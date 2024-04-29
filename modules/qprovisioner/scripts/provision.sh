@@ -348,7 +348,13 @@ elif [ "$add_nodes" == "true" ]; then
     $qqh network_mod_network --network-id 1 --floating-ip-ranges $halfFloatIPs
   fi
 
-  $qqh add_nodes --node-ips ${upgradeIPs[@]}
+  chk6=$(vercomp $cur_ver "6.1.2"; echo $?)
+  if [ $chk6 -eq 1 ]; then
+    $qqh add_nodes --node-ips ${upgradeIPs[@]}
+  else
+    $qqh add_nodes --node-ips ${upgradeIPs[@]} --batch
+  fi
+
   until ./qq --host ${upgradeIPs[0]} node_state_get | grep -q "ACTIVE"; do
     sleep 5
     echo "Waiting for Quorum"
